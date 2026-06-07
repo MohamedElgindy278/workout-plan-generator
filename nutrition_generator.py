@@ -121,24 +121,28 @@ def p1_cover(c, data):
     tl(c, 'CLIENT', 32, cy+40, 'Helvetica', 7, GRAY_LIGHT)
     tl(c, data.get('client_name', 'CLIENT'), 32, cy+16, 'Helvetica-Bold', 22, WHITE)
     tr(c, data.get('goal', 'FITNESS'), W-32, cy+28, 'Helvetica', 9, GREEN_LIGHT)
-    
+
     # Info pills
-    ry = cy - 70
-    pw = (W-50)/3
+    by = cy - 10
+    pw = (W - 40) / 3 - 5
     pills = [
-        ('DURATION', data.get('duration', '12 WEEKS')),
-        ('MEALS', data.get('meals_count', '4 MEALS')),
-        ('START', data.get('start_date', 'JUNE 2026')),
+    ('DURATION', data.get('duration', '12 WEEKS')),
+    ('MEALS', data.get('meals_count', '4 MEALS')),
+    ('START', data.get('start_date', 'JUNE 2026')),
     ]
     for i, (lbl, val) in enumerate(pills):
-        px = 20 + i*(pw+5)
-        rrect(c, px, ry, pw-5, 45, 6, Color(0,0,0,0.5), GOLD, 0.5)
-        tl(c, lbl, px+10, ry+30, 'Helvetica', 7, GRAY_LIGHT)
-        tl(c, val, px+10, ry+10, 'Helvetica-Bold', 12, GREEN_LIGHT)
-    
-    # Bottom
-    tr(c, f'Coach: {data.get("coach_name", "AHMED TEKA")}', W-20, 60, 'Helvetica-Bold', 12, WHITE)
-    
+        px = 20 + i * (pw + 7.5)
+        rrect(c, px, by-58, pw, 50, 4, Color(0,0,0,0.70), GOLD, 0.6)
+        tl(c, lbl, px+10, by-24, 'Helvetica', 7, GRAY_LIGHT)
+        tl(c, val, px+10, by-44, 'Helvetica-Bold', 12, GREEN_LIGHT)
+
+    # Footer
+    fill_rect(c, 0, 0, W, 40, Color(0,0,0,0.88))
+    hline(c, 0, 40, W, GREEN, 0.8)
+    tl(c, data.get('instagram', '@coach.teka1'), 20, 15, 'Helvetica', 8, GREEN_LIGHT)
+    tc(c, data.get('phone', '01033047057'), W/2, 15, 'Helvetica', 8, GRAY_LIGHT)
+    tr(c, f'Coach {data.get("coach_name", "AHMED TEKA")}', W-20, 15, 'Helvetica-Bold', 9, GREEN_LIGHT)
+
     c.showPage()
 
 # ═══════════════════════════════════════════════
