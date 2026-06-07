@@ -5,11 +5,13 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.colors import Color, HexColor
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+import arabic_reshaper
+from bidi.algorithm import get_display
 
 W, H = A4
 
 # ═══════════════════════════════════════════════
-# FONTS - Same logic as workout_generator.py
+# FONTS
 # ═══════════════════════════════════════════════
 FONT_PATHS = [
     'C:/Windows/Fonts/arial.ttf',
@@ -21,12 +23,31 @@ for fp in FONT_PATHS:
     if os.path.exists(fp):
         try:
             pdfmetrics.registerFont(TTFont('P-Reg', fp))
-            pdfmetrics.registerFont(TTFont('P-Bold', fp.replace('.ttf','bd.ttf').replace('Sans','Sans-Bold').replace('Regular','Bold')))
+            bold_path = fp.replace('.ttf','bd.ttf').replace('Sans','Sans-Bold').replace('Regular','Bold')
+            if os.path.exists(bold_path):
+                pdfmetrics.registerFont(TTFont('P-Bold', bold_path))
+            else:
+                pdfmetrics.registerFont(TTFont('P-Bold', fp))
             pdfmetrics.registerFont(TTFont('P-Light', fp))
             pdfmetrics.registerFont(TTFont('P-Med', fp))
             break
         except:
             pass
+
+# ═══════════════════════════════════════════════
+# ARABIC HELPER - Reshape text for PDF
+# ═══════════════════════════════════════════════
+def ar(text):
+    """Reshape Arabic text for proper display in PDF"""
+    try:
+        s = str(text)
+        if any('\u0600' <= c <= '\u06ff' for c in s):
+            reshaped = arabic_reshaper.reshape(s)
+            bidi = get_display(reshaped)
+            return bidi
+        return s
+    except:
+        return str(text)
 
 # ═══════════════════════════════════════════════
 # COLORS - White + Green + Gold
@@ -56,7 +77,7 @@ STRIPE_W    = 4
 TOTAL_PAGES = 6
 
 # ═══════════════════════════════════════════════
-# PRIMITIVES - Same as workout_generator
+# PRIMITIVES - Auto-reshape Arabic text
 # ═══════════════════════════════════════════════
 
 def fill_bg(c, col=None):
@@ -85,13 +106,16 @@ def rrect(c, x, y, w, h, r, fc, sc=None, sw=0.5):
     c.drawPath(p, fill=1, stroke=1 if sc else 0)
 
 def tl(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    c.setFillColor(col); c.setFont(f, sz); c.drawString(x, y, str(s))
+    c.setFillColor(col); c.setFont(f, sz)
+    c.drawString(x, y, ar(s))
 
 def tc(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    c.setFillColor(col); c.setFont(f, sz); c.drawCentredString(x, y, str(s))
+    c.setFillColor(col); c.setFont(f, sz)
+    c.drawCentredString(x, y, ar(s))
 
 def tr(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    c.setFillColor(col); c.setFont(f, sz); c.drawRightString(x, y, str(s))
+    c.setFillColor(col); c.setFont(f, sz)
+    c.drawRightString(x, y, ar(s))
 
 def hline(c, x, y, w, col=GREEN, lw=1.0):
     c.setStrokeColor(col); c.setLineWidth(lw); c.line(x, y, x+w, y)
@@ -110,7 +134,7 @@ def content_area():
 def wrap(c, text, x, y, maxw, f, sz, col, lh=None):
     lh = lh or sz * 1.55
     c.setFillColor(col); c.setFont(f, sz)
-    words = str(text).split()
+    words = ar(text).split()
     line = []
     for word in words:
         if c.stringWidth(' '.join(line + [word]), f, sz) <= maxw:
