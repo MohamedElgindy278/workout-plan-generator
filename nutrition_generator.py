@@ -5,47 +5,74 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.colors import Color, HexColor
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+import arabic_reshaper
+from bidi.algorithm import get_display
 
 W, H = A4
 
 # ═══════════════════════════════════════════════
-# FONTS - Try multiple paths for Arabic support
+# FONTS
 # ═══════════════════════════════════════════════
 FONT_PATHS = [
-    'C:/Windows/Fonts/arial.ttf',
-    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-    '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+    ('C:/Windows/Fonts/arial.ttf', 'C:/Windows/Fonts/arialbd.ttf'),
+    ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'),
 ]
 
-AR_FONT = None
-for fp in FONT_PATHS:
-    if os.path.exists(fp):
-        AR_FONT = fp
-        break
+AR = 'Helvetica'
+AR_BOLD = 'Helvetica-Bold'
 
-if AR_FONT:
+for reg_path, bold_path in FONT_PATHS:
+    if os.path.exists(reg_path):
+        try:
+            pdfmetrics.registerFont(TTFont('AR', reg_path))
+            AR = 'AR'
+            if os.path.exists(bold_path):
+                pdfmetrics.registerFont(TTFont('ARB', bold_path))
+                AR_BOLD = 'ARB'
+            else:
+                AR_BOLD = 'AR'
+            break
+        except:
+            pass
+
+# ═══════════════════════════════════════════════
+# ARABIC HELPER
+# ═══════════════════════════════════════════════
+def ar(text):
+    """Reshape and reorder Arabic text for PDF"""
     try:
-        pdfmetrics.registerFont(TTFont('AR', AR_FONT))
-        AR = 'AR'
+        reshaped = arabic_reshaper.reshape(str(text))
+        return get_display(reshaped)
     except:
-        AR = 'Helvetica'
-else:
-    AR = 'Helvetica'
+        return str(text)
+
+def is_arabic(text):
+    """Check if text contains Arabic characters"""
+    for char in str(text):
+        if '\u0600' <= char <= '\u06ff' or '\u0750' <= char <= '\u077f':
+            return True
+    return False
+
+def smart_font(text):
+    """Return AR for Arabic text, Helvetica for English"""
+    return AR if is_arabic(text) else 'Helvetica'
+
+def smart_font_bold(text):
+    """Return AR_BOLD for Arabic, Helvetica-Bold for English"""
+    return AR_BOLD if is_arabic(text) else 'Helvetica-Bold'
 
 # ═══════════════════════════════════════════════
-# COLORS - White + Green + Soft Gold
+# COLORS
 # ═══════════════════════════════════════════════
+BG_DARK     = HexColor('#0A1A0A')
 BG_WHITE    = HexColor('#FFFFFF')
 BG_CREAM    = HexColor('#F8FAF8')
-BG_DARK     = HexColor('#0A1A0A')
-CARD_BG     = HexColor('#F0F5F0')
 GREEN_DARK  = HexColor('#1B5E20')
 GREEN       = HexColor('#2E7D32')
 GREEN_MID   = HexColor('#4CAF50')
 GREEN_LIGHT = HexColor('#81C784')
 GREEN_DIM   = HexColor('#C8E6C9')
 GOLD        = HexColor('#C8963E')
-GOLD_LIGHT  = HexColor('#D4AF37')
 GRAY_DARK   = HexColor('#333333')
 GRAY        = HexColor('#666666')
 GRAY_LIGHT  = HexColor('#999999')
@@ -53,7 +80,7 @@ WHITE       = HexColor('#FFFFFF')
 BLACK       = HexColor('#111111')
 
 # ═══════════════════════════════════════════════
-# LAYOUT CONSTANTS
+# LAYOUT
 # ═══════════════════════════════════════════════
 M           = 24
 HDR_H       = 44
@@ -91,13 +118,19 @@ def rrect(c, x, y, w, h, r, fc, sc=None, sw=0.5):
     c.drawPath(p, fill=1, stroke=1 if sc else 0)
 
 def tl(c, s, x, y, f='Helvetica', sz=10, col=BLACK):
-    c.setFillColor(col); c.setFont(f, sz); c.drawString(x, y, str(s))
+    text = ar(s) if is_arabic(str(s)) else str(s)
+    font = smart_font(str(s)) if f == 'Helvetica' else (AR_BOLD if 'Bold' in f else AR)
+    c.setFillColor(col); c.setFont(font, sz); c.drawString(x, y, text)
 
 def tc(c, s, x, y, f='Helvetica', sz=10, col=BLACK):
-    c.setFillColor(col); c.setFont(f, sz); c.drawCentredString(x, y, str(s))
+    text = ar(s) if is_arabic(str(s)) else str(s)
+    font = smart_font(str(s)) if f == 'Helvetica' else (AR_BOLD if 'Bold' in f else AR)
+    c.setFillColor(col); c.setFont(font, sz); c.drawCentredString(x, y, text)
 
 def tr(c, s, x, y, f='Helvetica', sz=10, col=BLACK):
-    c.setFillColor(col); c.setFont(f, sz); c.drawRightString(x, y, str(s))
+    text = ar(s) if is_arabic(str(s)) else str(s)
+    font = smart_font(str(s)) if f == 'Helvetica' else (AR_BOLD if 'Bold' in f else AR)
+    c.setFillColor(col); c.setFont(font, sz); c.drawRightString(x, y, text)
 
 def hline(c, x, y, w, col=GREEN, lw=1.0):
     c.setStrokeColor(col); c.setLineWidth(lw); c.line(x, y, x+w, y)
@@ -115,11 +148,13 @@ def content_area():
 
 def wrap(c, text, x, y, maxw, f, sz, col, lh=None):
     lh = lh or sz * 1.55
-    c.setFillColor(col); c.setFont(f, sz)
-    words = str(text).split()
+    processed = ar(text) if is_arabic(str(text)) else str(text)
+    font = smart_font(str(text))
+    c.setFillColor(col); c.setFont(font, sz)
+    words = processed.split()
     line = []
     for word in words:
-        if c.stringWidth(' '.join(line + [word]), f, sz) <= maxw:
+        if c.stringWidth(' '.join(line + [word]), font, sz) <= maxw:
             line.append(word)
         else:
             if line: c.drawString(x, y, ' '.join(line)); y -= lh
@@ -177,8 +212,8 @@ def p1_cover(c, data):
     rrect(c, STRIPE_W+16, cy, W-STRIPE_W-32, 52, 6, Color(0,0,0,0.75), GREEN_MID, 1)
     fill_rect(c, STRIPE_W+16, cy, 4, 52, GREEN_MID)
     tl(c, 'CLIENT', STRIPE_W+28, cy+38, 'Helvetica', 7, GREEN_LIGHT)
-    tl(c, str(data.get('client_name', 'CLIENT')), STRIPE_W+28, cy+14, AR, 24, WHITE)
-    tr(c, str(data.get('goal', 'FITNESS')), W-24, cy+28, 'Helvetica', 8, GREEN_MID)
+    tl(c, data.get('client_name', 'CLIENT'), STRIPE_W+28, cy+14, 'Helvetica', 24, WHITE)
+    tr(c, data.get('goal', 'FITNESS'), W-24, cy+28, 'Helvetica', 8, GREEN_MID)
     
     by = cy - 8
     pw = (W - STRIPE_W - 36) / 3 - 5
@@ -191,7 +226,7 @@ def p1_cover(c, data):
         px = STRIPE_W + 16 + i * (pw + 7.5)
         rrect(c, px, by-55, pw, 46, 4, Color(0,0,0,0.65), GOLD, 0.5)
         tl(c, lbl, px+10, by-22, 'Helvetica', 7, GRAY_LIGHT)
-        tl(c, str(val), px+10, by-42, 'Helvetica-Bold', 11, GREEN_MID)
+        tl(c, val, px+10, by-42, 'Helvetica-Bold', 11, GREEN_MID)
     
     fill_rect(c, 0, 0, W, 38, Color(0,0,0,0.85))
     hline(c, 0, 38, W, GREEN_MID, 0.7)
@@ -232,12 +267,14 @@ def p2_profile(c, data):
         rrect(c, ix, iy-38, bw, 36, 5, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, ix, iy-38, 3, 36, GREEN)
         tl(c, lbl, ix+10, iy-12, 'Helvetica', 7, GRAY)
-        tl(c, str(val), ix+10, iy-28, AR, 12, BLACK)
+        tl(c, val, ix+10, iy-28, 'Helvetica', 12, BLACK)
     
     ny = py - 115
-    rrect(c, x, ny-38, cw, 36, 5, WHITE, GREEN_DIM, 0.4)
-    tl(c, 'COACH NOTES', x+10, ny-12, 'Helvetica-Bold', 9, GREEN)
-    tl(c, str(data.get('notes', ''))[:85], x+10, ny-28, AR, 8, GRAY)
+    if data.get('notes'):
+        rrect(c, x, ny-38, cw, 36, 5, WHITE, GREEN_DIM, 0.4)
+        tl(c, 'COACH NOTES', x+10, ny-12, 'Helvetica-Bold', 9, GREEN)
+        tl(c, data.get('notes', '')[:85], x+10, ny-28, 'Helvetica', 8, GRAY)
+        ny -= 50
     
     my = ny - 55
     tc(c, 'DAILY MACRONUTRIENTS', x + cw/2, my, 'Helvetica-Bold', 14, GREEN)
@@ -255,14 +292,14 @@ def p2_profile(c, data):
         mx = x + i * (mw + 8)
         rrect(c, mx, my-55, mw, 50, 7, WHITE, color, 0.8)
         circle(c, mx + mw/2, my-18, 16, color)
-        tc(c, str(val), mx + mw/2, my-22, 'Helvetica-Bold', 13, WHITE)
+        tc(c, val, mx + mw/2, my-22, 'Helvetica-Bold', 13, WHITE)
         tc(c, lbl, mx + mw/2, my-38, 'Helvetica', 7, GRAY)
         tc(c, unit, mx + mw/2, my-47, 'Helvetica', 6, GRAY)
     
     c.showPage()
 
 # ═══════════════════════════════════════════════
-# PAGE 3 - MEALS (Arabic)
+# PAGE 3 - MEALS
 # ═══════════════════════════════════════════════
 
 def p3_meals(c, data):
@@ -279,16 +316,16 @@ def p3_meals(c, data):
     my = y - 35
     for i, meal in enumerate(meals[:6]):
         icon = icons[i] if i < len(icons) else '🍽️'
-        mh = 105
+        mh = 108
         
         rrect(c, x, my-mh, cw, mh-3, 7, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, x, my-mh, 4, mh, GREEN)
         
         circle(c, x+28, my-22, 16, GREEN_DIM)
-        tc(c, icon, x+28, my-25, 'Helvetica', 14, BLACK)
+        tc(c, icon, x+28, my-26, 'Helvetica', 15, BLACK)
         
-        tl(c, str(meal.get('name', '')), x+52, my-12, AR, 11, BLACK)
-        tl(c, str(meal.get('type', '')), x+52, my-24, AR, 7, GRAY)
+        tl(c, meal.get('name', ''), x+52, my-12, 'Helvetica', 11, BLACK)
+        tl(c, meal.get('type', ''), x+52, my-24, 'Helvetica', 7, GRAY)
         
         tl(c, f'{meal.get("calories", "0")} kcal', x+52, my-40, 'Helvetica-Bold', 17, GREEN)
         tl(c, f'P:{meal.get("protein","0")}g  C:{meal.get("carbs","0")}g  F:{meal.get("fat","0")}g', x+52, my-52, 'Helvetica', 7, GRAY)
@@ -297,14 +334,14 @@ def p3_meals(c, data):
         ing_y = my - 65
         if isinstance(ingredients, list):
             for ing in ingredients[:4]:
-                tl(c, f'• {ing}', x+52, ing_y, AR, 7, GRAY)
+                tl(c, f'• {ing}', x+52, ing_y, 'Helvetica', 7, GRAY)
                 ing_y -= 10
         else:
-            tl(c, f'• {str(ingredients)[:55]}', x+52, ing_y, AR, 7, GRAY)
+            tl(c, f'• {ingredients[:55]}', x+52, ing_y, 'Helvetica', 7, GRAY)
         
         alt = meal.get('alternative', '')
         if alt:
-            tl(c, f'🔄 {str(alt)[:60]}', x+52, ing_y-2, AR, 6, GREEN)
+            tl(c, f'🔄 {alt[:60]}', x+52, ing_y-2, 'Helvetica', 6, GREEN)
         
         my -= mh + 3
     
@@ -350,11 +387,11 @@ def p4_guidelines(c, data):
         rrect(c, gx, gyy-42, gw, 38, 5, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, gx, gyy-42, 3, 38, GREEN)
         tl(c, title, gx+8, gyy-16, 'Helvetica-Bold', 9, GREEN)
-        wrap(c, str(body)[:45], gx+8, gyy-28, gw-12, AR, 7, GRAY, lh=10)
+        wrap(c, body[:45], gx+8, gyy-28, gw-12, 'Helvetica', 7, GRAY, lh=10)
     
     oy = gy - 125
     rrect(c, x, oy-28, cw, 24, 5, WHITE, GREEN_DIM, 0.4)
-    tl(c, f'🐟 Omega-3: {data.get("omega", "")}', x+10, oy-12, AR, 8, GREEN)
+    tl(c, f'🐟 Omega-3: {data.get("omega", "")}', x+10, oy-12, 'Helvetica', 8, GREEN)
     
     sy = oy - 42
     tc(c, 'SUPPLEMENTS', x + cw/2, sy, 'Helvetica-Bold', 13, GREEN)
@@ -367,7 +404,7 @@ def p4_guidelines(c, data):
         circle(c, x+16, sr-12, 9, GREEN)
         tc(c, str(i+1), x+16, sr-14, 'Helvetica-Bold', 6, WHITE)
         tl(c, sup.get('name', ''), x+30, sr-6, 'Helvetica-Bold', 9, BLACK)
-        tl(c, f'{sup.get("dose", "")} - {sup.get("benefit", "")}'[:50], x+30, sr-16, AR, 6, GRAY)
+        tl(c, f'{sup.get("dose", "")} - {sup.get("benefit", "")}'[:50], x+30, sr-16, 'Helvetica', 6, GRAY)
     
     c.showPage()
 
@@ -399,8 +436,8 @@ def p5_recipes(c, data):
         circle(c, rx + rw/2, ryy-38, 16, GREEN)
         tc(c, '🍽️', rx + rw/2, ryy-42, 'Helvetica', 14, WHITE)
         
-        tc(c, str(recipe.get('name', ''))[:16], rx + rw/2, ryy-65, AR, 9, BLACK)
-        tc(c, str(recipe.get('desc', ''))[:22], rx + rw/2, ryy-77, AR, 7, GRAY)
+        tc(c, recipe.get('name', '')[:16], rx + rw/2, ryy-65, 'Helvetica', 9, BLACK)
+        tc(c, recipe.get('desc', '')[:22], rx + rw/2, ryy-77, 'Helvetica', 7, GRAY)
         
         rrect(c, rx+8, ryy-98, rw-16, 16, 4, GREEN)
         tc(c, 'Watch', rx + rw/2, ryy-90, 'Helvetica-Bold', 7, WHITE)
@@ -413,7 +450,7 @@ def p5_recipes(c, data):
     if qy > FTR_H + 50:
         rrect(c, x, qy-40, cw, 36, 7, GREEN_DIM, GREEN, 0.8)
         tc(c, '"Stay consistent, stay disciplined."', x + cw/2, qy-14, 'Helvetica-Bold', 10, GREEN)
-        tc(c, f'- Ahmed Teka', x + cw/2, qy-28, 'Helvetica', 8, GRAY)
+        tc(c, '- Ahmed Teka', x + cw/2, qy-28, 'Helvetica', 8, GRAY)
     
     c.showPage()
 
