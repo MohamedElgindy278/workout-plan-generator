@@ -110,7 +110,7 @@ def p1_cover(c, data):
     tr(c, 'AHMED TEKA', W-16, H-26, 'Helvetica-Bold', 12, GREEN_LIGHT)
     
     # Title
-    ty = H - 160
+    ty = H - 120
     tc(c, 'NUTRITION', W/2, ty + 50, 'Helvetica-Bold', 52, WHITE)
     tc(c, 'PLAN', W/2, ty, 'Helvetica-Bold', 52, GREEN_LIGHT)
     tc(c, 'Personalized Meal Plan', W/2, ty - 25, 'Helvetica', 11, Color(1,1,1,0.7))
@@ -423,22 +423,22 @@ def p6_coach(c, data):
     tc(c, 'NUTRITION COACH', W/2, H/2-25, 'Helvetica', 14, GREEN_LIGHT)
     
     # Bottom bar
-    fill_rect(c, 0, 0, W, 70, Color(0,0,0,0.6))
-    hline(c, 0, 70, W, GREEN, 1)
-    
-    # Contact buttons
+    fill_rect(c, 0, 0, W, 90, Color(0,0,0,0.6))
+    hline(c, 0, 90, W, GREEN, 1)
+
+    # Contact buttons - lower position
     btn_w = 140; btn_h = 32
     total_w = 2*btn_w + 15
     bx_start = W/2 - total_w/2
-    
+
     for i, (lbl, color) in enumerate([
-        (f'@{data.get("instagram", "coach.teka1")}', GREEN),
-        (data.get('phone', '01033047057'), GOLD),
+    (f'@{data.get("instagram", "coach.teka1")}', GREEN),
+    (data.get('phone', '01033047057'), GOLD),
     ]):
-        bx = bx_start + i*(btn_w+15)
-        by = 20
-        rrect(c, bx, by, btn_w, btn_h, 5, Color(0,0,0,0.5), color, 1)
-        tc(c, lbl, bx+btn_w/2, by+btn_h/2-4, 'Helvetica-Bold', 10, WHITE)
+    bx = bx_start + i*(btn_w+15)
+    by = 10
+    rrect(c, bx, by, btn_w, btn_h, 5, Color(0,0,0,0.5), color, 1)
+    tc(c, lbl, bx+btn_w/2, by+btn_h/2-4, 'Helvetica-Bold', 10, WHITE)
     
     c.showPage()
 
