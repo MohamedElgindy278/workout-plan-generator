@@ -6,9 +6,9 @@ st.set_page_config(page_title='AHMED TEKA - Nutrition Plan', page_icon='🥗', l
 
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
-*{font-family:'Cairo',sans-serif!important}
-html, body, [class*="css"] {font-family:'Cairo',sans-serif!important}
+@import url('https://fonts.googleapis.com/earlyaccess/amiri.css');
+*{font-family:'Amiri','Cairo','Segoe UI',sans-serif!important}
+html, body, [class*="css"] {font-family:'Amiri','Cairo','Segoe UI',sans-serif!important}
 .main-header{background:linear-gradient(135deg,#080B12,#1A2235);padding:1.5rem;border-radius:15px;text-align:center;border:2px solid #D4AF37;margin-bottom:1.5rem}
 .main-header h1{color:#D4AF37;font-size:2rem;font-weight:900;margin:0}
 .main-header p{color:#9BA3B2;margin:0.3rem 0 0 0}
@@ -17,7 +17,7 @@ html, body, [class*="css"] {font-family:'Cairo',sans-serif!important}
 .gen-btn>button{background:linear-gradient(135deg,#D4AF37,#FF6B35)!important;color:#000!important;font-size:1.5rem!important;padding:1.5rem!important;font-weight:900!important;animation:pulse 1.5s infinite}
 @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(212,175,55,0.4)}70%{box-shadow:0 0 0 25px rgba(212,175,55,0)}100%{box-shadow:0 0 0 0 rgba(212,175,55,0)}}
 label{color:#D4AF37!important;font-weight:600!important}
-input,textarea,select{background-color:#1A2235!important;color:#E8E4DC!important;border:2px solid #374151!important;border-radius:8px!important;font-family:'Cairo',sans-serif!important}
+input,textarea,select{background-color:#1A2235!important;color:#E8E4DC!important;border:2px solid #374151!important;border-radius:8px!important;font-family:'Amiri','Cairo','Segoe UI',sans-serif!important}
 input:focus,textarea:focus{border-color:#D4AF37!important;box-shadow:0 0 5px rgba(212,175,55,0.3)!important}
 .day-header{background:linear-gradient(135deg,#1A2235,#080B12);padding:1rem;border-radius:10px;border-left:5px solid #D4AF37;margin:1rem 0}
 .day-header h4{color:#D4AF37;margin:0}
