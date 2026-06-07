@@ -335,7 +335,7 @@ def p2_profile(c, data):
 # ═══════════════════════════════════════════════
 
 def p3_meals(c, data):
-    fill_bg(c, BG_CREAM)
+    # fill_bg(c, BG_CREAM)
     
     # Add background image - full page
     bg_image = 'images/p3MEAlS.png'
