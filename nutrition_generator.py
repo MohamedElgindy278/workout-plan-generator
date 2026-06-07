@@ -38,7 +38,6 @@ for fp in FONT_PATHS:
 # ARABIC HELPER
 # ═══════════════════════════════════════════════
 def ar(text):
-    """Reshape Arabic text for proper display in PDF"""
     try:
         s = str(text)
         if any('\u0600' <= c <= '\u06ff' for c in s):
@@ -50,7 +49,7 @@ def ar(text):
         return str(text)
 
 # ═══════════════════════════════════════════════
-# COLORS - White + Green + Gold
+# COLORS
 # ═══════════════════════════════════════════════
 BG_DARK     = HexColor('#0A1A0A')
 BG_WHITE    = HexColor('#FFFFFF')
@@ -77,7 +76,7 @@ STRIPE_W    = 4
 TOTAL_PAGES = 6
 
 # ═══════════════════════════════════════════════
-# PRIMITIVES - All English labels (LTR), Arabic values auto-reshaped
+# PRIMITIVES
 # ═══════════════════════════════════════════════
 
 def fill_bg(c, col=None):
@@ -106,19 +105,13 @@ def rrect(c, x, y, w, h, r, fc, sc=None, sw=0.5):
     c.drawPath(p, fill=1, stroke=1 if sc else 0)
 
 def tl(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    """Left-aligned text - label on left, Arabic value reshaped"""
-    c.setFillColor(col); c.setFont(f, sz)
-    c.drawString(x, y, ar(s))
+    c.setFillColor(col); c.setFont(f, sz); c.drawString(x, y, ar(s))
 
 def tc(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    """Center-aligned text"""
-    c.setFillColor(col); c.setFont(f, sz)
-    c.drawCentredString(x, y, ar(s))
+    c.setFillColor(col); c.setFont(f, sz); c.drawCentredString(x, y, ar(s))
 
 def tr(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    """Right-aligned text - Arabic starts from right"""
-    c.setFillColor(col); c.setFont(f, sz)
-    c.drawRightString(x, y, ar(s))
+    c.setFillColor(col); c.setFont(f, sz); c.drawRightString(x, y, ar(s))
 
 def hline(c, x, y, w, col=GREEN, lw=1.0):
     c.setStrokeColor(col); c.setLineWidth(lw); c.line(x, y, x+w, y)
@@ -149,24 +142,24 @@ def wrap(c, text, x, y, maxw, f, sz, col, lh=None):
     return y
 
 # ═══════════════════════════════════════════════
-# CHROME - All English
+# CHROME
 # ═══════════════════════════════════════════════
 
 def chrome(c, section, pgnum, data):
     stripe(c)
     fill_rect(c, 0, H-HDR_H, W, HDR_H, BG_CREAM)
     hline(c, 0, H-HDR_H, W, GREEN, 0.8)
-    tl(c, 'AHMED', STRIPE_W+12, H-HDR_H+17, 'P-Bold', 12, GREEN)
-    tl(c, 'TEKA', STRIPE_W+68, H-HDR_H+17, 'P-Bold', 12, GRAY_DARK)
-    tc(c, section, W/2, H-HDR_H+17, 'P-Reg', 8, GRAY)
+    tl(c, 'AHMED', STRIPE_W+12, H-HDR_H+17, 'P-Bold', 13, GREEN)
+    tl(c, 'TEKA', STRIPE_W+68, H-HDR_H+17, 'P-Bold', 13, GRAY_DARK)
+    tc(c, section, W/2, H-HDR_H+17, 'P-Reg', 9, GRAY)
     fill_rect(c, 0, 0, W, FTR_H, BG_CREAM)
     hline(c, 0, FTR_H, W, GREEN, 0.6)
-    tl(c, '@coach.teka1', STRIPE_W+12, FTR_H/2-4, 'P-Reg', 7, GREEN)
-    tc(c, '01033047057', W/2, FTR_H/2-4, 'P-Reg', 7, GRAY)
-    tr(c, f'{pgnum} / {TOTAL_PAGES}', W-12, FTR_H/2-4, 'P-Bold', 8, GREEN)
+    tl(c, '@coach.teka1', STRIPE_W+12, FTR_H/2-4, 'P-Reg', 8, GREEN)
+    tc(c, '01033047057', W/2, FTR_H/2-4, 'P-Reg', 8, GRAY)
+    tr(c, f'{pgnum} / {TOTAL_PAGES}', W-12, FTR_H/2-4, 'P-Bold', 9, GREEN)
 
 # ═══════════════════════════════════════════════
-# PAGE 1 - COVER (English labels, Arabic values right-aligned)
+# PAGE 1 - COVER
 # ═══════════════════════════════════════════════
 
 def p1_cover(c, data):
@@ -185,25 +178,23 @@ def p1_cover(c, data):
     
     fill_rect(c, 0, H-50, W, 50, Color(0,0,0,0.8))
     hline(c, 0, H-50, W, GREEN_MID, 1)
-    tl(c, 'AHMED', STRIPE_W+16, H-32, 'P-Bold', 17, GREEN_MID)
-    tl(c, 'TEKA', STRIPE_W+82, H-32, 'P-Bold', 17, WHITE)
-    tr(c, 'NUTRITION COACH', W-16, H-32, 'P-Reg', 8, GRAY_LIGHT)
+    tl(c, 'AHMED', STRIPE_W+16, H-32, 'P-Bold', 18, GREEN_MID)
+    tl(c, 'TEKA', STRIPE_W+82, H-32, 'P-Bold', 18, WHITE)
+    tr(c, 'NUTRITION COACH', W-16, H-32, 'P-Reg', 9, GRAY_LIGHT)
     
     ty = H - 135
-    tc(c, 'NUTRITION', W/2, ty+15, 'P-Bold', 48, WHITE)
-    tc(c, 'PLAN', W/2, ty-30, 'P-Bold', 48, GREEN_MID)
-    tc(c, 'Personalized Meal Plan', W/2, ty-55, 'P-Reg', 10, Color(1,1,1,0.6))
+    tc(c, 'NUTRITION', W/2, ty+15, 'P-Bold', 52, WHITE)
+    tc(c, 'PLAN', W/2, ty-30, 'P-Bold', 52, GREEN_MID)
+    tc(c, 'Personalized Meal Plan', W/2, ty-55, 'P-Reg', 11, Color(1,1,1,0.6))
     
-    # Client card - label LEFT, Arabic name RIGHT
+    # Client card - Name only, no goal
     cy = ty - 100
-    rrect(c, STRIPE_W+16, cy, W-STRIPE_W-32, 52, 6, Color(0,0,0,0.75), GREEN_MID, 1)
-    fill_rect(c, STRIPE_W+16, cy, 4, 52, GREEN_MID)
-    tl(c, 'CLIENT', STRIPE_W+28, cy+38, 'P-Light', 7, GREEN_LIGHT)
-    # Arabic name: right-aligned
-    tr(c, data.get('client_name', 'CLIENT'), W-24, cy+14, 'P-Bold', 24, WHITE)
-    tr(c, data.get('goal', 'FITNESS'), W-24, cy+28, 'P-Reg', 8, GREEN_MID)
+    rrect(c, STRIPE_W+16, cy, W-STRIPE_W-32, 56, 6, Color(0,0,0,0.75), GREEN_MID, 1)
+    fill_rect(c, STRIPE_W+16, cy, 4, 56, GREEN_MID)
+    tl(c, 'CLIENT', STRIPE_W+28, cy+40, 'P-Light', 8, GREEN_LIGHT)
+    tr(c, data.get('client_name', 'CLIENT'), W-24, cy+10, 'P-Bold', 28, WHITE)
     
-    by = cy - 8
+    by = cy - 10
     pw = (W - STRIPE_W - 36) / 3 - 5
     pills = [
         ('DURATION', data.get('duration', '12 WEEKS')),
@@ -213,19 +204,19 @@ def p1_cover(c, data):
     for i, (lbl, val) in enumerate(pills):
         px = STRIPE_W + 16 + i * (pw + 7.5)
         rrect(c, px, by-55, pw, 46, 4, Color(0,0,0,0.65), GOLD2, 0.5)
-        tl(c, lbl, px+10, by-22, 'P-Light', 7, GRAY_LIGHT)
-        tl(c, val, px+10, by-42, 'P-Bold', 11, GREEN_MID)
+        tl(c, lbl, px+10, by-22, 'P-Light', 8, GRAY_LIGHT)
+        tl(c, val, px+10, by-42, 'P-Bold', 12, GREEN_MID)
     
     fill_rect(c, 0, 0, W, 38, Color(0,0,0,0.85))
     hline(c, 0, 38, W, GREEN_MID, 0.7)
-    tl(c, '@coach.teka1', STRIPE_W+16, 13, 'P-Reg', 8, GREEN_MID)
-    tc(c, '01033047057', W/2, 13, 'P-Reg', 8, GRAY_LIGHT)
-    tr(c, 'Coach Ahmed Teka', W-14, 13, 'P-Bold', 9, GREEN_MID)
+    tl(c, '@coach.teka1', STRIPE_W+16, 13, 'P-Reg', 9, GREEN_MID)
+    tc(c, '01033047057', W/2, 13, 'P-Reg', 9, GRAY_LIGHT)
+    tr(c, 'Coach Ahmed Teka', W-14, 13, 'P-Bold', 10, GREEN_MID)
     
     c.showPage()
 
 # ═══════════════════════════════════════════════
-# PAGE 2 - PROFILE (English labels LEFT, Arabic values RIGHT)
+# PAGE 2 - PROFILE
 # ═══════════════════════════════════════════════
 
 def p2_profile(c, data):
@@ -233,7 +224,7 @@ def p2_profile(c, data):
     chrome(c, 'CLIENT PROFILE', 2, data)
     x, y, cw = content_area()
     
-    tc(c, 'CLIENT PROFILE', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
+    tc(c, 'CLIENT PROFILE', x + cw/2, y - 10, 'P-Bold', 26, GREEN)
     hline(c, x, y - 20, cw, GREEN, 1)
     
     py = y - 40
@@ -250,23 +241,22 @@ def p2_profile(c, data):
         col = i % 2
         row = i // 2
         ix = x + col * (bw + 10)
-        iy = py - row * 50
+        iy = py - row * 52
         
-        rrect(c, ix, iy-38, bw, 36, 5, WHITE, GREEN_DIM, 0.3)
-        fill_rect(c, ix, iy-38, 3, 36, GREEN)
-        # Label LEFT, Value RIGHT
-        tl(c, lbl, ix+10, iy-28, 'P-Light', 7, GRAY)
-        tr(c, val, ix+bw-10, iy-28, 'P-Bold', 12, BLACK)
+        rrect(c, ix, iy-42, bw, 40, 5, WHITE, GREEN_DIM, 0.3)
+        fill_rect(c, ix, iy-42, 3, 40, GREEN)
+        tl(c, lbl, ix+10, iy-14, 'P-Light', 8, GRAY)
+        tr(c, val, ix+bw-10, iy-14, 'P-Bold', 14, BLACK)
     
-    ny = py - 115
+    ny = py - 120
     if data.get('notes'):
-        rrect(c, x, ny-38, cw, 36, 5, WHITE, GREEN_DIM, 0.4)
-        tl(c, 'COACH NOTES:', x+10, ny-12, 'P-Bold', 9, GREEN)
-        tr(c, data.get('notes', '')[:60], x+cw-10, ny-28, 'P-Reg', 8, GRAY)
-        ny -= 50
+        rrect(c, x, ny-42, cw, 40, 5, WHITE, GREEN_DIM, 0.4)
+        tl(c, 'COACH NOTES:', x+10, ny-14, 'P-Bold', 10, GREEN)
+        tr(c, data.get('notes', '')[:70], x+cw-10, ny-14, 'P-Reg', 10, GRAY)
+        ny -= 52
     
-    my = ny - 55
-    tc(c, 'DAILY MACRONUTRIENTS', x + cw/2, my, 'P-Bold', 14, GREEN)
+    my = ny - 60
+    tc(c, 'DAILY MACRONUTRIENTS', x + cw/2, my, 'P-Bold', 16, GREEN)
     hline(c, x, my-6, cw, GOLD, 0.6)
     
     macros = [
@@ -279,16 +269,16 @@ def p2_profile(c, data):
     mw = (cw - 24) / 4
     for i, (lbl, val, unit, color) in enumerate(macros):
         mx = x + i * (mw + 8)
-        rrect(c, mx, my-55, mw, 50, 7, WHITE, color, 0.8)
-        circle(c, mx + mw/2, my-18, 16, color)
-        tc(c, val, mx + mw/2, my-22, 'P-Bold', 13, WHITE)
-        tc(c, lbl, mx + mw/2, my-38, 'P-Light', 7, GRAY)
-        tc(c, unit, mx + mw/2, my-47, 'P-Light', 6, GRAY)
+        rrect(c, mx, my-60, mw, 55, 7, WHITE, color, 0.8)
+        circle(c, mx + mw/2, my-20, 18, color)
+        tc(c, val, mx + mw/2, my-25, 'P-Bold', 15, WHITE)
+        tc(c, lbl, mx + mw/2, my-42, 'P-Light', 8, GRAY)
+        tc(c, unit, mx + mw/2, my-52, 'P-Light', 7, GRAY)
     
     c.showPage()
 
 # ═══════════════════════════════════════════════
-# PAGE 3 - MEALS (English headers, Arabic content right-aligned)
+# PAGE 3 - MEALS (Larger text for readability)
 # ═══════════════════════════════════════════════
 
 def p3_meals(c, data):
@@ -296,7 +286,7 @@ def p3_meals(c, data):
     chrome(c, 'DAILY MEAL PLAN', 3, data)
     x, y, cw = content_area()
     
-    tc(c, 'DAILY MEAL PLAN', x + cw/2, y - 10, 'P-Bold', 22, GREEN)
+    tc(c, 'DAILY MEAL PLAN', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
     hline(c, x, y - 18, cw, GREEN, 0.8)
     
     meals = data.get('meals', [])
@@ -305,39 +295,42 @@ def p3_meals(c, data):
     my = y - 35
     for i, meal in enumerate(meals[:6]):
         icon = icons[i] if i < len(icons) else '🍽️'
-        mh = 108
+        mh = 115
         
         rrect(c, x, my-mh, cw, mh-3, 7, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, x, my-mh, 4, mh, GREEN)
         
-        circle(c, x+28, my-22, 16, GREEN_DIM)
-        tc(c, icon, x+28, my-26, 'P-Reg', 15, BLACK)
+        circle(c, x+30, my-24, 18, GREEN_DIM)
+        tc(c, icon, x+30, my-28, 'P-Reg', 16, BLACK)
         
-        # Arabic content RIGHT-aligned
-        tr(c, meal.get('name', ''), x+cw-12, my-12, 'P-Bold', 11, BLACK)
-        tr(c, meal.get('type', ''), x+cw-12, my-24, 'P-Reg', 7, GRAY)
+        # Meal name - BIGGER
+        tr(c, meal.get('name', ''), x+cw-12, my-12, 'P-Bold', 13, BLACK)
+        tr(c, meal.get('type', ''), x+cw-12, my-26, 'P-Reg', 8, GRAY)
         
-        tl(c, f'{meal.get("calories", "0")} kcal', x+52, my-40, 'P-Bold', 17, GREEN)
-        tl(c, f'P:{meal.get("protein","0")}g  C:{meal.get("carbs","0")}g  F:{meal.get("fat","0")}g', x+52, my-52, 'P-Reg', 7, GRAY)
+        # Calories - BIGGER
+        tl(c, f'{meal.get("calories", "0")} kcal', x+56, my-42, 'P-Bold', 19, GREEN)
+        tl(c, f'Protein:{meal.get("protein","0")}g | Carbs:{meal.get("carbs","0")}g | Fat:{meal.get("fat","0")}g', x+56, my-56, 'P-Reg', 9, GRAY)
         
+        # Ingredients - BIGGER
         ingredients = meal.get('ingredients', [])
-        ing_y = my - 65
+        ing_y = my - 72
         if isinstance(ingredients, list):
             for ing in ingredients[:4]:
-                tr(c, f'• {ing}', x+cw-12, ing_y, 'P-Reg', 7, GRAY)
-                ing_y -= 10
+                tr(c, f'• {ing}', x+cw-12, ing_y, 'P-Reg', 9, GRAY)
+                ing_y -= 13
         else:
-            tr(c, f'• {ingredients[:55]}', x+cw-12, ing_y, 'P-Reg', 7, GRAY)
+            tr(c, f'• {ingredients[:55]}', x+cw-12, ing_y, 'P-Reg', 9, GRAY)
         
+        # Alternative - BIGGER
         alt = meal.get('alternative', '')
         if alt:
-            tr(c, f'🔄 {alt[:60]}', x+cw-12, ing_y-2, 'P-Reg', 6, GREEN)
+            tr(c, f'🔄 Alternative: {alt[:55]}', x+cw-12, ing_y, 'P-Reg', 8, GREEN)
         
         my -= mh + 3
     
     if my > FTR_H + 50:
-        rrect(c, x, my-35, cw, 32, 7, GREEN_DIM, GREEN, 1)
-        tc(c, f'Total: {data.get("total_calories", "0")} kcal/day', x + cw/2, my-16, 'P-Bold', 13, GREEN)
+        rrect(c, x, my-38, cw, 34, 7, GREEN_DIM, GREEN, 1)
+        tc(c, f'Total: {data.get("total_calories", "0")} kcal/day', x + cw/2, my-16, 'P-Bold', 15, GREEN)
     
     c.showPage()
 
@@ -350,16 +343,16 @@ def p4_guidelines(c, data):
     chrome(c, 'GUIDELINES', 4, data)
     x, y, cw = content_area()
     
-    tc(c, 'DAILY GUIDELINES', x + cw/2, y - 10, 'P-Bold', 22, GREEN)
+    tc(c, 'DAILY GUIDELINES', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
     hline(c, x, y - 18, cw, GREEN, 0.8)
     
     wy = y - 35
-    rrect(c, x, wy-48, cw, 44, 7, WHITE, GREEN, 1.2)
-    fill_rect(c, x, wy-48, 4, 44, GREEN)
-    tc(c, '💧 DAILY HYDRATION', x + cw/2, wy-16, 'P-Bold', 11, GREEN)
-    tc(c, f'{data.get("water", "4-6 L")} per day', x + cw/2, wy-34, 'P-Bold', 18, BLACK)
+    rrect(c, x, wy-50, cw, 46, 7, WHITE, GREEN, 1.2)
+    fill_rect(c, x, wy-50, 4, 46, GREEN)
+    tc(c, '💧 DAILY HYDRATION', x + cw/2, wy-16, 'P-Bold', 12, GREEN)
+    tc(c, f'{data.get("water", "4-6 L")} per day', x + cw/2, wy-36, 'P-Bold', 20, BLACK)
     
-    gy = wy - 60
+    gy = wy - 65
     gw = (cw - 12) / 2
     guidelines = [
         ('Meal Timing', data.get('meal_timing', '')),
@@ -372,30 +365,30 @@ def p4_guidelines(c, data):
         col = i % 2
         row = i // 2
         gx = x + col * (gw + 12)
-        gyy = gy - row * 55
+        gyy = gy - row * 58
         
-        rrect(c, gx, gyy-42, gw, 38, 5, WHITE, GREEN_DIM, 0.3)
-        fill_rect(c, gx, gyy-42, 3, 38, GREEN)
-        tl(c, title, gx+8, gyy-16, 'P-Bold', 9, GREEN)
-        tr(c, body[:35], gx+gw-8, gyy-28, 'P-Reg', 7, GRAY)
+        rrect(c, gx, gyy-46, gw, 42, 5, WHITE, GREEN_DIM, 0.3)
+        fill_rect(c, gx, gyy-46, 3, 42, GREEN)
+        tl(c, title, gx+8, gyy-16, 'P-Bold', 10, GREEN)
+        tr(c, body[:40], gx+gw-8, gyy-16, 'P-Reg', 9, GRAY)
     
-    oy = gy - 125
-    rrect(c, x, oy-28, cw, 24, 5, WHITE, GREEN_DIM, 0.4)
-    tl(c, '🐟 Omega-3:', x+10, oy-12, 'P-Bold', 8, GREEN)
-    tr(c, data.get('omega', ''), x+cw-10, oy-12, 'P-Reg', 8, GRAY)
+    oy = gy - 130
+    rrect(c, x, oy-32, cw, 28, 5, WHITE, GREEN_DIM, 0.4)
+    tl(c, '🐟 Omega-3:', x+10, oy-12, 'P-Bold', 10, GREEN)
+    tr(c, data.get('omega', ''), x+cw-10, oy-12, 'P-Reg', 10, GRAY)
     
-    sy = oy - 42
-    tc(c, 'SUPPLEMENTS', x + cw/2, sy, 'P-Bold', 13, GREEN)
+    sy = oy - 48
+    tc(c, 'SUPPLEMENTS', x + cw/2, sy, 'P-Bold', 15, GREEN)
     hline(c, x, sy-5, cw, GOLD, 0.4)
     
     supplements = data.get('supplements', [])
     for i, sup in enumerate(supplements[:4]):
-        sr = sy - 18 - i * 30
-        rrect(c, x, sr-22, cw, 20, 4, WHITE, GREEN_DIM, 0.2)
-        circle(c, x+16, sr-12, 9, GREEN)
-        tc(c, str(i+1), x+16, sr-14, 'P-Bold', 6, WHITE)
-        tl(c, sup.get('name', ''), x+30, sr-6, 'P-Bold', 9, BLACK)
-        tr(c, f'{sup.get("dose", "")} - {sup.get("benefit", "")}'[:40], x+cw-10, sr-16, 'P-Reg', 6, GRAY)
+        sr = sy - 20 - i * 35
+        rrect(c, x, sr-26, cw, 24, 4, WHITE, GREEN_DIM, 0.2)
+        circle(c, x+18, sr-14, 10, GREEN)
+        tc(c, str(i+1), x+18, sr-17, 'P-Bold', 7, WHITE)
+        tl(c, sup.get('name', ''), x+34, sr-6, 'P-Bold', 10, BLACK)
+        tr(c, f'{sup.get("dose", "")} - {sup.get("benefit", "")}'[:45], x+cw-10, sr-6, 'P-Reg', 9, GRAY)
     
     c.showPage()
 
@@ -408,7 +401,7 @@ def p5_recipes(c, data):
     chrome(c, 'RECIPES', 5, data)
     x, y, cw = content_area()
     
-    tc(c, 'RECIPE LIBRARY', x + cw/2, y - 10, 'P-Bold', 22, GREEN)
+    tc(c, 'RECIPE LIBRARY', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
     hline(c, x, y - 18, cw, GREEN, 0.8)
     
     recipes = data.get('recipes', [])
@@ -419,29 +412,29 @@ def p5_recipes(c, data):
         col = i % 3
         row = i // 3
         rx = x + col * (rw + 8)
-        ryy = ry - row * 120
+        ryy = ry - row * 125
         
-        rrect(c, rx, ryy-105, rw, 100, 7, WHITE, GREEN_DIM, 0.3)
+        rrect(c, rx, ryy-110, rw, 105, 7, WHITE, GREEN_DIM, 0.3)
         
-        circle(c, rx + rw/2, ryy-38, 22, GREEN_DIM)
-        circle(c, rx + rw/2, ryy-38, 16, GREEN)
-        tc(c, '🍽️', rx + rw/2, ryy-42, 'P-Reg', 14, WHITE)
+        circle(c, rx + rw/2, ryy-40, 24, GREEN_DIM)
+        circle(c, rx + rw/2, ryy-40, 18, GREEN)
+        tc(c, '🍽️', rx + rw/2, ryy-44, 'P-Reg', 15, WHITE)
         
-        tc(c, recipe.get('name', '')[:16], rx + rw/2, ryy-65, 'P-Bold', 9, BLACK)
-        tc(c, recipe.get('desc', '')[:22], rx + rw/2, ryy-77, 'P-Reg', 7, GRAY)
+        tc(c, recipe.get('name', '')[:16], rx + rw/2, ryy-68, 'P-Bold', 10, BLACK)
+        tc(c, recipe.get('desc', '')[:22], rx + rw/2, ryy-82, 'P-Reg', 8, GRAY)
         
-        rrect(c, rx+8, ryy-98, rw-16, 16, 4, GREEN)
-        tc(c, 'Watch', rx + rw/2, ryy-90, 'P-Bold', 7, WHITE)
+        rrect(c, rx+10, ryy-104, rw-20, 18, 4, GREEN)
+        tc(c, 'Watch', rx + rw/2, ryy-94, 'P-Bold', 8, WHITE)
         
         link = recipe.get('link', '#')
         if link and link != '#':
-            c.linkURL(link, (rx+8, ryy-98, rx+rw-8, ryy-82))
+            c.linkURL(link, (rx+10, ryy-104, rx+rw-10, ryy-86))
     
-    qy = ry - 270
+    qy = ry - 280
     if qy > FTR_H + 50:
-        rrect(c, x, qy-40, cw, 36, 7, GREEN_DIM, GREEN, 0.8)
-        tc(c, '"Stay consistent, stay disciplined."', x + cw/2, qy-14, 'P-Bold', 10, GREEN)
-        tc(c, '- Ahmed Teka', x + cw/2, qy-28, 'P-Reg', 8, GRAY)
+        rrect(c, x, qy-44, cw, 40, 7, GREEN_DIM, GREEN, 0.8)
+        tc(c, '"Stay consistent, stay disciplined."', x + cw/2, qy-16, 'P-Bold', 12, GREEN)
+        tc(c, '- Ahmed Teka', x + cw/2, qy-32, 'P-Reg', 10, GRAY)
     
     c.showPage()
 
@@ -465,18 +458,18 @@ def p6_coach(c, data):
     
     fill_rect(c, 0, H-48, W, 48, Color(0,0,0,0.8))
     hline(c, 0, H-48, W, GREEN_MID, 0.8)
-    tl(c, 'AHMED', STRIPE_W+16, H-30, 'P-Bold', 17, GREEN_MID)
-    tl(c, 'TEKA', STRIPE_W+82, H-30, 'P-Bold', 17, WHITE)
-    tr(c, 'YOUR COACH', W-16, H-30, 'P-Reg', 8, GRAY_LIGHT)
+    tl(c, 'AHMED', STRIPE_W+16, H-30, 'P-Bold', 18, GREEN_MID)
+    tl(c, 'TEKA', STRIPE_W+82, H-30, 'P-Bold', 18, WHITE)
+    tr(c, 'YOUR COACH', W-16, H-30, 'P-Reg', 9, GRAY_LIGHT)
     
     cy = H * 0.55
-    tc(c, 'AHMED TEKA', W/2, cy, 'P-Bold', 44, GREEN_MID)
-    tc(c, 'NUTRITION COACH', W/2, cy-32, 'P-Reg', 13, WHITE)
+    tc(c, 'AHMED TEKA', W/2, cy, 'P-Bold', 48, GREEN_MID)
+    tc(c, 'NUTRITION COACH', W/2, cy-34, 'P-Reg', 14, WHITE)
     
     fill_rect(c, 0, 0, W, 75, Color(0,0,0,0.8))
     hline(c, 0, 75, W, GREEN_MID, 0.7)
     
-    btn_w = 150; btn_h = 30
+    btn_w = 150; btn_h = 32
     total_w = 2*btn_w + 12
     bx_start = W/2 - total_w/2
     
@@ -487,9 +480,9 @@ def p6_coach(c, data):
         bx = bx_start + i*(btn_w+12)
         by = 22
         rrect(c, bx, by, btn_w, btn_h, 5, Color(0,0,0,0.4), color, 1)
-        tc(c, lbl, bx+btn_w/2, by+btn_h/2-4, 'P-Bold', 9, WHITE)
+        tc(c, lbl, bx+btn_w/2, by+btn_h/2-4, 'P-Bold', 10, WHITE)
     
-    tr(c, f'{TOTAL_PAGES} / {TOTAL_PAGES}', W-14, 85, 'P-Bold', 8, GREEN_MID)
+    tr(c, f'{TOTAL_PAGES} / {TOTAL_PAGES}', W-14, 85, 'P-Bold', 9, GREEN_MID)
     
     c.showPage()
 
