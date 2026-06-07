@@ -142,6 +142,78 @@ def wrap(c, text, x, y, maxw, f, sz, col, lh=None):
     return y
 
 # ═══════════════════════════════════════════════
+# ICON DRAWER
+# ═══════════════════════════════════════════════
+
+def draw_icon(c, icon_name, cx, cy, size=14, color=GREEN):
+    s = size / 14
+    c.setFillColor(color)
+    
+    if icon_name == 'bowl':
+        c.setStrokeColor(color); c.setLineWidth(2)
+        c.arc(cx-s*7, cy-s*3, cx+s*7, cy+s*3, 180, 360)
+        c.line(cx-s*7, cy, cx+s*7, cy)
+        c.setFillColor(GREEN_LIGHT)
+        c.ellipse(cx-s*5, cy+s*1, cx+s*5, cy+s*6, fill=1)
+    elif icon_name == 'muscle':
+        c.setStrokeColor(color); c.setLineWidth(2.5)
+        c.line(cx-s*5, cy+s*2, cx+s*5, cy-s*2)
+        c.circle(cx-s*2, cy-s*4, s*3, fill=1)
+        c.circle(cx+s*3, cy+s*4, s*3, fill=1)
+    elif icon_name == 'meat':
+        c.setFillColor(GOLD)
+        c.ellipse(cx-s*5, cy-s*3, cx+s*5, cy+s*3, fill=1)
+        c.setFillColor(color)
+        c.rect(cx+s*3, cy-s*1.5, s*3.5, s*3, fill=1)
+    elif icon_name == 'salad':
+        c.setFillColor(GREEN_LIGHT)
+        c.circle(cx, cy, s*5, fill=1)
+        c.setFillColor(GREEN)
+        c.ellipse(cx-s*7, cy, cx, cy+s*6, fill=1)
+    elif icon_name == 'pasta':
+        c.setStrokeColor(color); c.setLineWidth(2)
+        c.circle(cx, cy, s*6, fill=0, stroke=1)
+        c.setFillColor(GOLD)
+        c.circle(cx, cy, s*2.5, fill=1)
+    elif icon_name == 'drink':
+        c.setStrokeColor(color); c.setLineWidth(1.5)
+        c.rect(cx-s*4, cy-s*5, s*8, s*8, fill=0, stroke=1)
+        c.setFillColor(GREEN_LIGHT)
+        c.rect(cx-s*2.5, cy-s*3, s*5, s*5, fill=1)
+    elif icon_name == 'plate':
+        c.setStrokeColor(color); c.setLineWidth(1.8)
+        c.circle(cx, cy, s*6, fill=0, stroke=1)
+        c.circle(cx, cy, s*3.5, fill=0, stroke=1)
+    elif icon_name == 'egg':
+        c.setFillColor(WHITE)
+        c.ellipse(cx-s*3.5, cy-s*5, cx+s*3.5, cy+s*5, fill=1)
+        c.setFillColor(GOLD)
+        c.circle(cx, cy, s*2.5, fill=1)
+    elif icon_name == 'steak':
+        c.setFillColor(HexColor('#C0392B'))
+        c.roundRect(cx-s*6, cy-s*4, s*12, s*8, 2, fill=1, stroke=0)
+    elif icon_name == 'rice':
+        c.setStrokeColor(color); c.setLineWidth(1.5)
+        c.arc(cx-s*6, cy-s*3, cx+s*6, cy+s*3, 180, 360)
+        c.line(cx-s*6, cy, cx+s*6, cy)
+        c.setFillColor(WHITE)
+        for px in [-4, 0, 4]:
+            for py in [-2, 2]:
+                c.circle(cx+px*s*0.7, cy+py*s*0.7+2, s*0.8, fill=1)
+    elif icon_name == 'apple':
+        c.setFillColor(HexColor('#E74C3C'))
+        c.circle(cx, cy, s*5, fill=1)
+        c.setFillColor(GREEN)
+        c.ellipse(cx-s*1.5, cy+s*3.5, cx+s*1.5, cy+s*7, fill=1)
+    elif icon_name == 'nuts':
+        c.setFillColor(HexColor('#D4A574'))
+        c.ellipse(cx-s*2.5, cy-s*4, cx+s*2.5, cy+s*4, fill=1)
+        c.setStrokeColor(HexColor('#8B6914')); c.setLineWidth(0.8)
+        c.line(cx, cy-s*4, cx, cy+s*4)
+    else:
+        c.circle(cx, cy, s*5, fill=1)
+
+# ═══════════════════════════════════════════════
 # CHROME
 # ═══════════════════════════════════════════════
 
@@ -180,41 +252,37 @@ def p1_cover(c, data):
     hline(c, 0, H-50, W, GREEN_MID, 1)
     tl(c, 'AHMED', STRIPE_W+16, H-32, 'P-Bold', 18, GREEN_MID)
     tl(c, 'TEKA', STRIPE_W+82, H-32, 'P-Bold', 18, WHITE)
-    tr(c, data.get('cover_subtitle', 'NUTRITION COACH'), W-16, H-32, 'P-Reg', 9, GRAY_LIGHT)
+    tr(c, 'NUTRITION COACH', W-16, H-32, 'P-Reg', 9, GRAY_LIGHT)
     
     ty = H - 135
-    # Cover icon
-    cover_icon = data.get('cover_icon', '🥗')
-    tc(c, cover_icon, W/2, ty+55, 'P-Reg', 40, GREEN_MID)
+    tc(c, 'NUTRITION', W/2, ty+15, 'P-Bold', 52, WHITE)
+    tc(c, 'PLAN', W/2, ty-30, 'P-Bold', 52, GREEN_MID)
+    tc(c, 'Personalized Meal Plan', W/2, ty-55, 'P-Reg', 11, Color(1,1,1,0.6))
     
-    tc(c, data.get('cover_title', 'NUTRITION'), W/2, ty, 'P-Bold', 52, WHITE)
-    tc(c, data.get('cover_title2', 'PLAN'), W/2, ty-42, 'P-Bold', 52, GREEN_MID)
-    tc(c, data.get('cover_subtitle2', 'Personalized Meal Plan'), W/2, ty-68, 'P-Reg', 11, Color(1,1,1,0.6))
-    
-    cy = ty - 115
+    cy = ty - 100
     rrect(c, STRIPE_W+16, cy, W-STRIPE_W-32, 56, 6, Color(0,0,0,0.75), GREEN_MID, 1)
     fill_rect(c, STRIPE_W+16, cy, 4, 56, GREEN_MID)
-    tl(c, data.get('client_label', 'CLIENT'), STRIPE_W+28, cy+40, 'P-Light', 8, GREEN_LIGHT)
+    tl(c, 'CLIENT', STRIPE_W+28, cy+40, 'P-Light', 8, GREEN_LIGHT)
     tr(c, data.get('client_name', 'CLIENT'), W-24, cy+10, 'P-Bold', 28, WHITE)
     
     by = cy - 10
     pw = (W - STRIPE_W - 36) / 3 - 5
     pills = [
-        (data.get('pill1_label', 'DURATION'), data.get('duration', '12 WEEKS'), data.get('pill1_icon', '⏱️')),
-        (data.get('pill2_label', 'MEALS'), data.get('meals_count', '4 MEALS'), data.get('pill2_icon', '🍽️')),
-        (data.get('pill3_label', 'START'), data.get('start_date', 'JUNE 2026'), data.get('pill3_icon', '📅')),
+        ('DURATION', data.get('duration', '12 WEEKS')),
+        ('MEALS', data.get('meals_count', '4 MEALS')),
+        ('START', data.get('start_date', 'JUNE 2026')),
     ]
-    for i, (lbl, val, picon) in enumerate(pills):
+    for i, (lbl, val) in enumerate(pills):
         px = STRIPE_W + 16 + i * (pw + 7.5)
         rrect(c, px, by-55, pw, 46, 4, Color(0,0,0,0.65), GOLD2, 0.5)
-        tl(c, f'{picon} {lbl}', px+10, by-22, 'P-Light', 8, GRAY_LIGHT)
+        tl(c, lbl, px+10, by-22, 'P-Light', 8, GRAY_LIGHT)
         tl(c, val, px+10, by-42, 'P-Bold', 12, GREEN_MID)
     
     fill_rect(c, 0, 0, W, 38, Color(0,0,0,0.85))
     hline(c, 0, 38, W, GREEN_MID, 0.7)
-    tl(c, f'📸 {data.get("instagram", "@coach.teka1")}', STRIPE_W+16, 13, 'P-Reg', 9, GREEN_MID)
-    tc(c, f'📞 {data.get("phone", "01033047057")}', W/2, 13, 'P-Reg', 9, GRAY_LIGHT)
-    tr(c, f'👤 Coach {data.get("coach_name", "Ahmed Teka")}', W-14, 13, 'P-Bold', 10, GREEN_MID)
+    tl(c, '@coach.teka1', STRIPE_W+16, 13, 'P-Reg', 9, GREEN_MID)
+    tc(c, '01033047057', W/2, 13, 'P-Reg', 9, GRAY_LIGHT)
+    tr(c, 'Coach Ahmed Teka', W-14, 13, 'P-Bold', 10, GREEN_MID)
     
     c.showPage()
 
@@ -227,17 +295,16 @@ def p2_profile(c, data):
     chrome(c, 'CLIENT PROFILE', 2, data)
     x, y, cw = content_area()
     
-    profile_icon = data.get('profile_icon', '👤')
-    tc(c, f'{profile_icon} CLIENT PROFILE', x + cw/2, y - 10, 'P-Bold', 26, GREEN)
+    tc(c, 'CLIENT PROFILE', x + cw/2, y - 10, 'P-Bold', 26, GREEN)
     hline(c, x, y - 20, cw, GREEN, 1)
     
     py = y - 40
     info_items = [
-        ('👤 FULL NAME', data.get('full_name', 'N/A')),
-        ('🎂 AGE', data.get('age', 'N/A')),
-        ('⚖️ WEIGHT', data.get('weight', 'N/A')),
-        ('📏 HEIGHT', data.get('height', 'N/A')),
-        ('🎯 GOAL', data.get('goal', 'N/A')),
+        ('FULL NAME', data.get('full_name', 'N/A')),
+        ('AGE', data.get('age', 'N/A')),
+        ('WEIGHT', data.get('weight', 'N/A')),
+        ('HEIGHT', data.get('height', 'N/A')),
+        ('GOAL', data.get('goal', 'N/A')),
     ]
     
     bw = (cw - 10) / 2
@@ -255,20 +322,19 @@ def p2_profile(c, data):
     ny = py - 120
     if data.get('notes'):
         rrect(c, x, ny-42, cw, 40, 5, WHITE, GREEN_DIM, 0.4)
-        tl(c, f'📝 COACH NOTES:', x+10, ny-14, 'P-Bold', 10, GREEN)
+        tl(c, 'COACH NOTES:', x+10, ny-14, 'P-Bold', 10, GREEN)
         tr(c, data.get('notes', '')[:70], x+cw-10, ny-14, 'P-Reg', 10, GRAY)
         ny -= 52
     
     my = ny - 60
-    macros_icon = data.get('macros_icon', '📊')
-    tc(c, f'{macros_icon} DAILY MACRONUTRIENTS', x + cw/2, my, 'P-Bold', 16, GREEN)
+    tc(c, 'DAILY MACRONUTRIENTS', x + cw/2, my, 'P-Bold', 16, GREEN)
     hline(c, x, my-6, cw, GOLD, 0.6)
     
     macros = [
-        ('🍽️ MEALS', data.get('main_meals', '4'), 'per day', GREEN),
-        ('🥩 PROTEIN', data.get('protein_g', '0'), 'g/day', GREEN_MID),
-        ('🍚 CARBS', data.get('carbs_g', '0'), 'g/day', GOLD2),
-        ('🧈 FAT', data.get('fat_g', '0'), 'g/day', GREEN_LIGHT),
+        ('MEALS', data.get('main_meals', '4'), 'per day', GREEN),
+        ('PROTEIN', data.get('protein_g', '0'), 'g/day', GREEN_MID),
+        ('CARBS', data.get('carbs_g', '0'), 'g/day', GOLD2),
+        ('FAT', data.get('fat_g', '0'), 'g/day', GREEN_LIGHT),
     ]
     
     mw = (cw - 24) / 4
@@ -291,29 +357,27 @@ def p3_meals(c, data):
     chrome(c, 'DAILY MEAL PLAN', 3, data)
     x, y, cw = content_area()
     
-    meals_icon = data.get('meals_header_icon', '🍽️')
-    tc(c, f'{meals_icon} DAILY MEAL PLAN', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
+    tc(c, 'DAILY MEAL PLAN', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
     hline(c, x, y - 18, cw, GREEN, 0.8)
     
     meals = data.get('meals', [])
-    default_icons = ['🥣', '💪', '🍗', '🥗', '🍝', '🥤']
     
     my = y - 35
     for i, meal in enumerate(meals[:6]):
-        icon = meal.get('icon', default_icons[i] if i < len(default_icons) else '🍽️')
         mh = 120
         
         rrect(c, x, my-mh, cw, mh-3, 7, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, x, my-mh, 4, mh, GREEN)
         
+        # Draw icon
         circle(c, x+30, my-28, 18, GREEN_DIM)
-        tc(c, icon, x+30, my-32, 'P-Reg', 16, BLACK)
+        draw_icon(c, meal.get('icon', 'plate'), x+30, my-28, 12, GREEN)
         
         tr(c, meal.get('name', ''), x+cw-12, my-16, 'P-Bold', 13, BLACK)
         tr(c, meal.get('type', ''), x+cw-12, my-30, 'P-Reg', 8, GRAY)
         
-        tl(c, f'🔥 {meal.get("calories", "0")} kcal', x+56, my-44, 'P-Bold', 18, GREEN)
-        tl(c, f'🥩 P:{meal.get("protein","0")}g | 🍚 C:{meal.get("carbs","0")}g | 🧈 F:{meal.get("fat","0")}g', x+56, my-58, 'P-Reg', 9, GRAY)
+        tl(c, f'{meal.get("calories", "0")} kcal', x+56, my-44, 'P-Bold', 18, GREEN)
+        tl(c, f'P:{meal.get("protein","0")}g | C:{meal.get("carbs","0")}g | F:{meal.get("fat","0")}g', x+56, my-58, 'P-Reg', 9, GRAY)
         
         ingredients = meal.get('ingredients', [])
         ing_y = my - 44
@@ -332,7 +396,7 @@ def p3_meals(c, data):
     
     if my > FTR_H + 50:
         rrect(c, x, my-38, cw, 34, 7, GREEN_DIM, GREEN, 1)
-        tc(c, f'🔥 Total: {data.get("total_calories", "0")} kcal/day', x + cw/2, my-16, 'P-Bold', 15, GREEN)
+        tc(c, f'Total: {data.get("total_calories", "0")} kcal/day', x + cw/2, my-16, 'P-Bold', 15, GREEN)
     
     c.showPage()
 
@@ -345,27 +409,25 @@ def p4_guidelines(c, data):
     chrome(c, 'GUIDELINES', 4, data)
     x, y, cw = content_area()
     
-    guidelines_icon = data.get('guidelines_icon', '📋')
-    tc(c, f'{guidelines_icon} DAILY GUIDELINES', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
+    tc(c, 'DAILY GUIDELINES', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
     hline(c, x, y - 18, cw, GREEN, 0.8)
     
     wy = y - 35
-    water_icon = data.get('water_icon', '💧')
     rrect(c, x, wy-50, cw, 46, 7, WHITE, GREEN, 1.2)
     fill_rect(c, x, wy-50, 4, 46, GREEN)
-    tc(c, f'{water_icon} DAILY HYDRATION', x + cw/2, wy-16, 'P-Bold', 12, GREEN)
+    tc(c, 'DAILY HYDRATION', x + cw/2, wy-16, 'P-Bold', 12, GREEN)
     tc(c, f'{data.get("water", "4-6 L")} per day', x + cw/2, wy-36, 'P-Bold', 20, BLACK)
     
     gy = wy - 65
     gw = (cw - 12) / 2
     guidelines = [
-        ('⏰ Meal Timing', data.get('meal_timing', ''), '⏰'),
-        ('⚖️ Food Weighing', data.get('food_weighing', ''), '⚖️'),
-        ('🥤 Drinks', data.get('drinks', ''), '🥤'),
-        ('🚫 Restricted', data.get('sweets', ''), '🚫'),
+        ('Meal Timing', data.get('meal_timing', '')),
+        ('Food Weighing', data.get('food_weighing', '')),
+        ('Drinks', data.get('drinks', '')),
+        ('Restricted', data.get('sweets', '')),
     ]
     
-    for i, (title, body, gicon) in enumerate(guidelines):
+    for i, (title, body) in enumerate(guidelines):
         col = i % 2
         row = i // 2
         gx = x + col * (gw + 12)
@@ -373,18 +435,15 @@ def p4_guidelines(c, data):
         
         rrect(c, gx, gyy-46, gw, 42, 5, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, gx, gyy-46, 3, 42, GREEN)
-        tl(c, f'{gicon} {title}', gx+8, gyy-16, 'P-Bold', 10, GREEN)
+        tl(c, title, gx+8, gyy-16, 'P-Bold', 10, GREEN)
         tr(c, body[:40], gx+gw-8, gyy-16, 'P-Reg', 9, GRAY)
     
     oy = gy - 130
-    omega_icon = data.get('omega_icon', '🐟')
     rrect(c, x, oy-32, cw, 28, 5, WHITE, GREEN_DIM, 0.4)
-    tl(c, f'{omega_icon} Omega-3:', x+10, oy-12, 'P-Bold', 10, GREEN)
-    tr(c, data.get('omega', ''), x+cw-10, oy-12, 'P-Reg', 10, GRAY)
+    tl(c, f'Omega-3: {data.get("omega", "")}', x+10, oy-12, 'P-Bold', 10, GREEN)
     
     sy = oy - 48
-    supplements_icon = data.get('supplements_icon', '💊')
-    tc(c, f'{supplements_icon} SUPPLEMENTS', x + cw/2, sy, 'P-Bold', 15, GREEN)
+    tc(c, 'SUPPLEMENTS', x + cw/2, sy, 'P-Bold', 15, GREEN)
     hline(c, x, sy-5, cw, GOLD, 0.4)
     
     supplements = data.get('supplements', [])
@@ -396,18 +455,16 @@ def p4_guidelines(c, data):
         tl(c, sup.get('name', ''), x+34, sr-6, 'P-Bold', 10, BLACK)
         tr(c, f'{sup.get("dose", "")} - {sup.get("benefit", "")}'[:45], x+cw-10, sr-6, 'P-Reg', 9, GRAY)
     
-    # Pre-workout
     py2 = sy - 20 - len(supplements) * 35 - 15
     if py2 > FTR_H + 60:
-        preworkout_icon = data.get('preworkout_icon', '⚡')
-        tc(c, f'{preworkout_icon} PRE-WORKOUT PROTOCOL', x + cw/2, py2, 'P-Bold', 13, GREEN)
+        tc(c, 'PRE-WORKOUT PROTOCOL', x + cw/2, py2, 'P-Bold', 13, GREEN)
         hline(c, x, py2-5, cw, GOLD, 0.4)
         
         preworkout = data.get('preworkout', [])
         for i, pw in enumerate(preworkout[:2]):
             pwy = py2 - 20 - i * 30
             rrect(c, x, pwy-22, cw, 20, 4, GREEN_DIM, GREEN, 0.2)
-            tl(c, f'⏱️ {pw.get("time", "")}: {pw.get("item", "")}'[:65], x+10, pwy-10, 'P-Reg', 9, BLACK)
+            tl(c, f'{pw.get("time", "")}: {pw.get("item", "")}'[:65], x+10, pwy-10, 'P-Reg', 9, BLACK)
     
     c.showPage()
 
@@ -420,8 +477,7 @@ def p5_recipes(c, data):
     chrome(c, 'RECIPES', 5, data)
     x, y, cw = content_area()
     
-    recipes_icon = data.get('recipes_header_icon', '🍳')
-    tc(c, f'{recipes_icon} RECIPE LIBRARY', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
+    tc(c, 'RECIPE LIBRARY', x + cw/2, y - 10, 'P-Bold', 24, GREEN)
     hline(c, x, y - 18, cw, GREEN, 0.8)
     
     recipes = data.get('recipes', [])
@@ -438,14 +494,13 @@ def p5_recipes(c, data):
         
         circle(c, rx + rw/2, ryy-40, 24, GREEN_DIM)
         circle(c, rx + rw/2, ryy-40, 18, GREEN)
-        rec_icon = recipe.get('icon', '🍽️')
-        tc(c, rec_icon, rx + rw/2, ryy-44, 'P-Reg', 15, WHITE)
+        draw_icon(c, recipe.get('icon', 'plate'), rx + rw/2, ryy-40, 12, WHITE)
         
         tc(c, recipe.get('name', '')[:16], rx + rw/2, ryy-68, 'P-Bold', 10, BLACK)
         tc(c, recipe.get('desc', '')[:22], rx + rw/2, ryy-82, 'P-Reg', 8, GRAY)
         
         rrect(c, rx+10, ryy-104, rw-20, 18, 4, GREEN)
-        tc(c, '▶ Watch', rx + rw/2, ryy-94, 'P-Bold', 8, WHITE)
+        tc(c, 'Watch', rx + rw/2, ryy-94, 'P-Bold', 8, WHITE)
         
         link = recipe.get('link', '#')
         if link and link != '#':
@@ -453,9 +508,8 @@ def p5_recipes(c, data):
     
     qy = ry - 280
     if qy > FTR_H + 50:
-        quote_icon = data.get('quote_icon', '💬')
         rrect(c, x, qy-44, cw, 40, 7, GREEN_DIM, GREEN, 0.8)
-        tc(c, f'{quote_icon} "Stay consistent, stay disciplined."', x + cw/2, qy-16, 'P-Bold', 12, GREEN)
+        tc(c, '"Stay consistent, stay disciplined."', x + cw/2, qy-16, 'P-Bold', 12, GREEN)
         tc(c, f'- {data.get("coach_name", "Ahmed Teka")}', x + cw/2, qy-32, 'P-Reg', 10, GRAY)
     
     c.showPage()
@@ -482,12 +536,11 @@ def p6_coach(c, data):
     hline(c, 0, H-48, W, GREEN_MID, 0.8)
     tl(c, 'AHMED', STRIPE_W+16, H-30, 'P-Bold', 18, GREEN_MID)
     tl(c, 'TEKA', STRIPE_W+82, H-30, 'P-Bold', 18, WHITE)
-    tr(c, data.get('coach_label', 'YOUR COACH'), W-16, H-30, 'P-Reg', 9, GRAY_LIGHT)
+    tr(c, 'YOUR COACH', W-16, H-30, 'P-Reg', 9, GRAY_LIGHT)
     
     cy = H * 0.55
-    coach_icon = data.get('coach_page_icon', '🏋️')
-    tc(c, data.get('coach_name', 'AHMED TEKA'), W/2, cy, 'P-Bold', 48, GREEN_MID)
-    tc(c, f'{coach_icon} {data.get("coach_title", "NUTRITION COACH")}', W/2, cy-34, 'P-Reg', 14, WHITE)
+    tc(c, 'AHMED TEKA', W/2, cy, 'P-Bold', 48, GREEN_MID)
+    tc(c, 'NUTRITION COACH', W/2, cy-34, 'P-Reg', 14, WHITE)
     
     fill_rect(c, 0, 0, W, 75, Color(0,0,0,0.8))
     hline(c, 0, 75, W, GREEN_MID, 0.7)
@@ -497,8 +550,8 @@ def p6_coach(c, data):
     bx_start = W/2 - total_w/2
     
     for i, (lbl, color) in enumerate([
-        (f'📸 {data.get("instagram", "@coach.teka1")}', GREEN_MID),
-        (f'📞 {data.get("phone", "01033047057")}', GOLD2),
+        (f'@{data.get("instagram", "@coach.teka1")}', GREEN_MID),
+        (data.get('phone', '01033047057'), GOLD2),
     ]):
         bx = bx_start + i*(btn_w+12)
         by = 22

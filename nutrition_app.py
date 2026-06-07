@@ -30,6 +30,14 @@ div[data-baseweb="tooltip"] p{color:#080B12!important;font-weight:500!important}
 
 st.markdown('<div class="main-header"><h1>🥗 AHMED TEKA — NUTRITION PLAN</h1><p>Professional · Personalized Meal Plan Generator</p></div>', unsafe_allow_html=True)
 
+# Meal icons mapping
+MEAL_ICONS = {
+    '🥣 Bowl': 'bowl', '💪 Muscle': 'muscle', '🍗 Meat': 'meat',
+    '🥗 Salad': 'salad', '🍝 Pasta': 'pasta', '🥤 Drink': 'drink',
+    '🍎 Apple': 'apple', '🥜 Nuts': 'nuts', '🍽️ Plate': 'plate',
+    '🍳 Egg': 'egg', '🥩 Steak': 'steak', '🍚 Rice': 'rice',
+}
+
 # Initialize session states
 for i in range(8):
     if f'ing_count_{i}' not in st.session_state:
@@ -37,9 +45,6 @@ for i in range(8):
 
 with st.form('nutrition_form'):
     
-    # ═══════════════════════════════════════════════
-    # COVER PAGE INFO
-    # ═══════════════════════════════════════════════
     st.markdown('## 📋 COVER PAGE INFORMATION')
     
     c1, c2, c3 = st.columns(3)
@@ -58,9 +63,6 @@ with st.form('nutrition_form'):
     
     notes = st.text_area('📝 Coach Notes', 'نظام مخصص بالكامل لزيادة الكتلة العضلية تحت إشراف المدرب أحمد تيكا', height=70)
     
-    # ═══════════════════════════════════════════════
-    # MACROS
-    # ═══════════════════════════════════════════════
     st.markdown('---')
     st.markdown('## 📊 MACRONUTRIENTS')
     
@@ -76,15 +78,11 @@ with st.form('nutrition_form'):
     
     total_calories = st.text_input('🔥 Total Daily Calories', '2502')
     
-    # ═══════════════════════════════════════════════
-    # MEALS
-    # ═══════════════════════════════════════════════
     st.markdown('---')
     st.markdown('## 🍽️ MEALS')
     
     num_meals = st.number_input('Number of meals', 1, 8, 4)
     meals = []
-    food_icons = ['🥣', '💪', '🍗', '🥗', '🍝', '🥤', '🍎', '🥜']
     
     for i in range(int(num_meals)):
         st.markdown(f'<div class="day-header"><h4>Meal {i+1}</h4></div>', unsafe_allow_html=True)
@@ -99,9 +97,10 @@ with st.form('nutrition_form'):
                 value=['الوجبة الأولى', 'الوجبة الثانية', 'الوجبة الثالثة', 'الوجبة الرابعة'][i] if i < 4 else f'الوجبة {i+1}',
                 key=f'type_{i}')
         with mc3:
-            meal_icon = st.text_input(f'🖼️ Icon {i+1}',
-                value=food_icons[i] if i < 8 else '🍽️',
-                key=f'micon_{i}')
+            icon_keys = list(MEAL_ICONS.keys())
+            meal_icon_display = st.selectbox(f'🖼️ Icon {i+1}', icon_keys,
+                index=i if i < len(icon_keys) else 0, key=f'micon_{i}')
+            meal_icon = MEAL_ICONS[meal_icon_display]
         
         mc4, mc5, mc6, mc7 = st.columns(4)
         with mc4:
@@ -120,7 +119,6 @@ with st.form('nutrition_form'):
                    'يمكن استبدال البيض بـ صدر دجاج 120 جم'][i] if i < 4 else 'بديل صحي',
             key=f'alt_{i}')
         
-        # Ingredients - Dynamic fields
         st.markdown(f'**🛒 Ingredients**')
         ing_col1, ing_col2, ing_col3 = st.columns([1, 1, 4])
         with ing_col1:
@@ -151,9 +149,6 @@ with st.form('nutrition_form'):
             'ingredients': ingredients, 'alternative': alternative,
         })
     
-    # ═══════════════════════════════════════════════
-    # GUIDELINES
-    # ═══════════════════════════════════════════════
     st.markdown('---')
     st.markdown('## 📋 GUIDELINES')
     
@@ -169,9 +164,6 @@ with st.form('nutrition_form'):
     
     omega = st.text_input('🐟 Omega-3', '5-3 جم أوميجا 3 يومياً موزعاً على الوجبات')
     
-    # ═══════════════════════════════════════════════
-    # SUPPLEMENTS
-    # ═══════════════════════════════════════════════
     st.markdown('---')
     st.markdown('## 💊 SUPPLEMENTS')
     
@@ -185,9 +177,6 @@ with st.form('nutrition_form'):
             parts = line.split('|')
             supplements.append({'name': parts[0].strip(), 'dose': parts[1].strip(), 'benefit': parts[2].strip() if len(parts) > 2 else ''})
     
-    # ═══════════════════════════════════════════════
-    # PRE-WORKOUT
-    # ═══════════════════════════════════════════════
     st.markdown('---')
     st.markdown('## ⚡ PRE-WORKOUT PROTOCOL')
     
@@ -201,9 +190,6 @@ with st.form('nutrition_form'):
             parts = line.split('|')
             preworkout.append({'time': parts[0].strip(), 'item': parts[1].strip()})
     
-    # ═══════════════════════════════════════════════
-    # RECIPES
-    # ═══════════════════════════════════════════════
     st.markdown('---')
     st.markdown('## 🍳 RECIPES')
     
@@ -221,11 +207,8 @@ with st.form('nutrition_form'):
         with rc3:
             rlink = st.text_input(f'Link {i+1}', 'https://youtube.com/watch?v=example', key=f'rlink_{i}')
         if rname.strip():
-            recipes.append({'name': rname.strip(), 'desc': rdesc.strip(), 'link': rlink.strip()})
+            recipes.append({'name': rname.strip(), 'desc': rdesc.strip(), 'link': rlink.strip(), 'icon': 'plate'})
     
-    # ═══════════════════════════════════════════════
-    # COACH INFO
-    # ═══════════════════════════════════════════════
     st.markdown('---')
     st.markdown('## 🧑‍🏫 COACH INFORMATION')
     
@@ -237,9 +220,6 @@ with st.form('nutrition_form'):
     with cc3:
         phone = st.text_input('Phone', '01033047057')
     
-    # ═══════════════════════════════════════════════
-    # GENERATE
-    # ═══════════════════════════════════════════════
     st.markdown('---')
     st.markdown('<div class="gen-btn">', unsafe_allow_html=True)
     submitted = st.form_submit_button('🥗 GENERATE NUTRITION PLAN PDF', use_container_width=True)
