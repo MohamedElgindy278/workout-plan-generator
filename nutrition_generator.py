@@ -335,15 +335,18 @@ def p2_profile(c, data):
 # ═══════════════════════════════════════════════
 
 def p3_meals(c, data):
-    # fill_bg(c, BG_CREAM)
-    
-    # Add background image - full page
+    # Don't fill background first - let the image show
+    # Then draw image at full opacity
     bg_image = 'images/p3MEAlS.png'
     try:
         if os.path.exists(bg_image):
-            c.drawImage(bg_image, 0, 0, W, H, preserveAspectRatio=True, alpha=0.10)
+            c.drawImage(bg_image, 0, 0, W, H, preserveAspectRatio=True)
     except:
-        pass
+        fill_bg(c, BG_CREAM)
+    
+    # Very light overlay to make text readable
+    c.setFillColor(Color(1, 1, 1, 0.75))
+    c.rect(0, 0, W, H, stroke=0, fill=1)
     
     chrome(c, 'DAILY MEAL PLAN', 3, data)
     x, y, cw = content_area()
@@ -357,11 +360,9 @@ def p3_meals(c, data):
     for i, meal in enumerate(meals[:6]):
         mh = 120
         
-        # Semi-transparent white background for readability
-        rrect(c, x, my-mh, cw, mh-3, 7, Color(1,1,1,0.92), GREEN_DIM, 0.3)
+        rrect(c, x, my-mh, cw, mh-3, 7, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, x, my-mh, 4, mh, GREEN)
         
-        # Meal icon from URL
         icon_url = meal.get('icon', '')
         icon_loaded = False
         if icon_url and icon_url.startswith('http'):
@@ -399,8 +400,7 @@ def p3_meals(c, data):
         rrect(c, x, my-38, cw, 34, 7, GREEN_DIM, GREEN, 1)
         tc(c, f'Total: {data.get("total_calories", "0")} kcal/day', x + cw/2, my-16, 'P-Bold', 15, GREEN)
     
-    c.showPage()
-# ═══════════════════════════════════════════════
+    c.showPage()# ═══════════════════════════════════════════════
 # PAGE 4 - GUIDELINES
 # ═══════════════════════════════════════════════
 
