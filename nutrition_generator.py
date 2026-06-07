@@ -1,5 +1,8 @@
 import os
 import io
+import requests
+from PIL import Image
+from io import BytesIO
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.colors import Color, HexColor
@@ -14,22 +17,21 @@ W, H = A4
 # FONTS
 # ═══════════════════════════════════════════════
 FONT_PATHS = [
-    'C:/Windows/Fonts/arial.ttf',
-    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-    '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+    ('C:/Windows/Fonts/arial.ttf', 'C:/Windows/Fonts/arialbd.ttf'),
+    ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'),
+    ('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'),
 ]
 
-for fp in FONT_PATHS:
-    if os.path.exists(fp):
+for reg_path, bold_path in FONT_PATHS:
+    if os.path.exists(reg_path):
         try:
-            pdfmetrics.registerFont(TTFont('P-Reg', fp))
-            bold_path = fp.replace('.ttf','bd.ttf').replace('Sans','Sans-Bold').replace('Regular','Bold')
+            pdfmetrics.registerFont(TTFont('P-Reg', reg_path))
             if os.path.exists(bold_path):
                 pdfmetrics.registerFont(TTFont('P-Bold', bold_path))
             else:
-                pdfmetrics.registerFont(TTFont('P-Bold', fp))
-            pdfmetrics.registerFont(TTFont('P-Light', fp))
-            pdfmetrics.registerFont(TTFont('P-Med', fp))
+                pdfmetrics.registerFont(TTFont('P-Bold', reg_path))
+            pdfmetrics.registerFont(TTFont('P-Light', reg_path))
+            pdfmetrics.registerFont(TTFont('P-Med', reg_path))
             break
         except:
             pass
@@ -47,6 +49,38 @@ def ar(text):
         return s
     except:
         return str(text)
+
+# ═══════════════════════════════════════════════
+# IMAGE LOADER
+# ═══════════════════════════════════════════════
+temp_images = []
+
+def load_image_from_url(url, max_size=(200, 200)):
+    """Download image from URL, return temp path"""
+    if not url or url == '#' or not url.startswith('http'):
+        return None
+    try:
+        response = requests.get(url, timeout=10, headers={'User-Agent': 'Mozilla/5.0'})
+        response.raise_for_status()
+        img = Image.open(BytesIO(response.content))
+        img = img.convert('RGB')
+        img.thumbnail(max_size, Image.LANCZOS)
+        temp_path = f'temp_img_{len(temp_images)}.jpg'
+        img.save(temp_path, 'JPEG', quality=85)
+        temp_images.append(temp_path)
+        return temp_path
+    except Exception as e:
+        print(f"Failed to load image {url}: {e}")
+        return None
+
+def cleanup_temp_images():
+    """Remove temporary image files"""
+    for path in temp_images:
+        try:
+            if os.path.exists(path):
+                os.remove(path)
+        except:
+            pass
 
 # ═══════════════════════════════════════════════
 # COLORS
@@ -140,78 +174,6 @@ def wrap(c, text, x, y, maxw, f, sz, col, lh=None):
             line = [word]
     if line: c.drawString(x, y, ' '.join(line)); y -= lh
     return y
-
-# ═══════════════════════════════════════════════
-# ICON DRAWER
-# ═══════════════════════════════════════════════
-
-def draw_icon(c, icon_name, cx, cy, size=14, color=GREEN):
-    s = size / 14
-    c.setFillColor(color)
-    
-    if icon_name == 'bowl':
-        c.setStrokeColor(color); c.setLineWidth(2)
-        c.arc(cx-s*7, cy-s*3, cx+s*7, cy+s*3, 180, 360)
-        c.line(cx-s*7, cy, cx+s*7, cy)
-        c.setFillColor(GREEN_LIGHT)
-        c.ellipse(cx-s*5, cy+s*1, cx+s*5, cy+s*6, fill=1)
-    elif icon_name == 'muscle':
-        c.setStrokeColor(color); c.setLineWidth(2.5)
-        c.line(cx-s*5, cy+s*2, cx+s*5, cy-s*2)
-        c.circle(cx-s*2, cy-s*4, s*3, fill=1)
-        c.circle(cx+s*3, cy+s*4, s*3, fill=1)
-    elif icon_name == 'meat':
-        c.setFillColor(GOLD)
-        c.ellipse(cx-s*5, cy-s*3, cx+s*5, cy+s*3, fill=1)
-        c.setFillColor(color)
-        c.rect(cx+s*3, cy-s*1.5, s*3.5, s*3, fill=1)
-    elif icon_name == 'salad':
-        c.setFillColor(GREEN_LIGHT)
-        c.circle(cx, cy, s*5, fill=1)
-        c.setFillColor(GREEN)
-        c.ellipse(cx-s*7, cy, cx, cy+s*6, fill=1)
-    elif icon_name == 'pasta':
-        c.setStrokeColor(color); c.setLineWidth(2)
-        c.circle(cx, cy, s*6, fill=0, stroke=1)
-        c.setFillColor(GOLD)
-        c.circle(cx, cy, s*2.5, fill=1)
-    elif icon_name == 'drink':
-        c.setStrokeColor(color); c.setLineWidth(1.5)
-        c.rect(cx-s*4, cy-s*5, s*8, s*8, fill=0, stroke=1)
-        c.setFillColor(GREEN_LIGHT)
-        c.rect(cx-s*2.5, cy-s*3, s*5, s*5, fill=1)
-    elif icon_name == 'plate':
-        c.setStrokeColor(color); c.setLineWidth(1.8)
-        c.circle(cx, cy, s*6, fill=0, stroke=1)
-        c.circle(cx, cy, s*3.5, fill=0, stroke=1)
-    elif icon_name == 'egg':
-        c.setFillColor(WHITE)
-        c.ellipse(cx-s*3.5, cy-s*5, cx+s*3.5, cy+s*5, fill=1)
-        c.setFillColor(GOLD)
-        c.circle(cx, cy, s*2.5, fill=1)
-    elif icon_name == 'steak':
-        c.setFillColor(HexColor('#C0392B'))
-        c.roundRect(cx-s*6, cy-s*4, s*12, s*8, 2, fill=1, stroke=0)
-    elif icon_name == 'rice':
-        c.setStrokeColor(color); c.setLineWidth(1.5)
-        c.arc(cx-s*6, cy-s*3, cx+s*6, cy+s*3, 180, 360)
-        c.line(cx-s*6, cy, cx+s*6, cy)
-        c.setFillColor(WHITE)
-        for px in [-4, 0, 4]:
-            for py in [-2, 2]:
-                c.circle(cx+px*s*0.7, cy+py*s*0.7+2, s*0.8, fill=1)
-    elif icon_name == 'apple':
-        c.setFillColor(HexColor('#E74C3C'))
-        c.circle(cx, cy, s*5, fill=1)
-        c.setFillColor(GREEN)
-        c.ellipse(cx-s*1.5, cy+s*3.5, cx+s*1.5, cy+s*7, fill=1)
-    elif icon_name == 'nuts':
-        c.setFillColor(HexColor('#D4A574'))
-        c.ellipse(cx-s*2.5, cy-s*4, cx+s*2.5, cy+s*4, fill=1)
-        c.setStrokeColor(HexColor('#8B6914')); c.setLineWidth(0.8)
-        c.line(cx, cy-s*4, cx, cy+s*4)
-    else:
-        c.circle(cx, cy, s*5, fill=1)
 
 # ═══════════════════════════════════════════════
 # CHROME
@@ -369,9 +331,18 @@ def p3_meals(c, data):
         rrect(c, x, my-mh, cw, mh-3, 7, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, x, my-mh, 4, mh, GREEN)
         
-        # Draw icon
-        circle(c, x+30, my-28, 18, GREEN_DIM)
-        draw_icon(c, meal.get('icon', 'plate'), x+30, my-28, 12, GREEN)
+        # Meal icon from URL
+        icon_url = meal.get('icon', '')
+        icon_loaded = False
+        if icon_url and icon_url.startswith('http'):
+            icon_path = load_image_from_url(icon_url, (40, 40))
+            if icon_path and os.path.exists(icon_path):
+                c.drawImage(icon_path, x+10, my-38, 36, 36, preserveAspectRatio=True, mask='auto')
+                icon_loaded = True
+        
+        if not icon_loaded:
+            circle(c, x+28, my-28, 18, GREEN_DIM)
+            tc(c, '🍽', x+28, my-32, 'P-Reg', 14, BLACK)
         
         tr(c, meal.get('name', ''), x+cw-12, my-16, 'P-Bold', 13, BLACK)
         tr(c, meal.get('type', ''), x+cw-12, my-30, 'P-Reg', 8, GRAY)
@@ -492,9 +463,30 @@ def p5_recipes(c, data):
         
         rrect(c, rx, ryy-110, rw, 105, 7, WHITE, GREEN_DIM, 0.3)
         
-        circle(c, rx + rw/2, ryy-40, 24, GREEN_DIM)
-        circle(c, rx + rw/2, ryy-40, 18, GREEN)
-        draw_icon(c, recipe.get('icon', 'plate'), rx + rw/2, ryy-40, 12, WHITE)
+        # Recipe image from URL
+        img_url = recipe.get('image', '')
+        img_loaded = False
+        if img_url and img_url.startswith('http'):
+            img_path = load_image_from_url(img_url, (60, 60))
+            if img_path and os.path.exists(img_path):
+                c.saveState()
+                # Clip to circle
+                clip_path = c.beginPath()
+                clip_path.circle(rx + rw/2, ryy-40, 24)
+                c.clipPath(clip_path, stroke=0, fill=0)
+                c.drawImage(img_path, rx + rw/2 - 24, ryy-64, 48, 48, preserveAspectRatio=True)
+                c.restoreState()
+                img_loaded = True
+        
+        if not img_loaded:
+            circle(c, rx + rw/2, ryy-40, 24, GREEN_DIM)
+            circle(c, rx + rw/2, ryy-40, 18, GREEN)
+            tc(c, '🍽', rx + rw/2, ryy-44, 'P-Reg', 14, WHITE)
+        else:
+            # Draw border circle over image
+            c.setStrokeColor(GREEN)
+            c.setLineWidth(2)
+            c.circle(rx + rw/2, ryy-40, 24, fill=0, stroke=1)
         
         tc(c, recipe.get('name', '')[:16], rx + rw/2, ryy-68, 'P-Bold', 10, BLACK)
         tc(c, recipe.get('desc', '')[:22], rx + rw/2, ryy-82, 'P-Reg', 8, GRAY)
@@ -582,4 +574,5 @@ def generate_nutrition_pdf(data):
     c.save()
     pdf_bytes = buffer.getvalue()
     buffer.close()
+    cleanup_temp_images()
     return pdf_bytes

@@ -30,14 +30,6 @@ div[data-baseweb="tooltip"] p{color:#080B12!important;font-weight:500!important}
 
 st.markdown('<div class="main-header"><h1>🥗 AHMED TEKA — NUTRITION PLAN</h1><p>Professional · Personalized Meal Plan Generator</p></div>', unsafe_allow_html=True)
 
-# Meal icons mapping
-MEAL_ICONS = {
-    '🥣 Bowl': 'bowl', '💪 Muscle': 'muscle', '🍗 Meat': 'meat',
-    '🥗 Salad': 'salad', '🍝 Pasta': 'pasta', '🥤 Drink': 'drink',
-    '🍎 Apple': 'apple', '🥜 Nuts': 'nuts', '🍽️ Plate': 'plate',
-    '🍳 Egg': 'egg', '🥩 Steak': 'steak', '🍚 Rice': 'rice',
-}
-
 # Initialize session states
 for i in range(8):
     if f'ing_count_{i}' not in st.session_state:
@@ -46,22 +38,24 @@ for i in range(8):
 with st.form('nutrition_form'):
     
     st.markdown('## 📋 COVER PAGE INFORMATION')
+    st.markdown('<p class="section-desc">These details appear on the cover page of the PDF.</p>', unsafe_allow_html=True)
     
     c1, c2, c3 = st.columns(3)
     with c1:
-        client_name = st.text_input('👤 Client Name', 'محمد')
-        full_name = st.text_input('📛 Full Name', 'محمد أحمد')
-        age = st.text_input('🎂 Age', '28 سنة')
+        client_name = st.text_input('👤 Client Name', 'محمد', help='Client name displayed on the cover page.')
+        full_name = st.text_input('📛 Full Name', 'محمد أحمد', help='Full name for the profile page.')
+        age = st.text_input('🎂 Age', '28 سنة', help='Client age.')
     with c2:
-        weight = st.text_input('⚖️ Weight', '80 كجم')
-        height = st.text_input('📏 Height', '175 سم')
-        goal = st.text_input('🎯 Goal', 'بناء عضلي')
+        weight = st.text_input('⚖️ Weight', '80 كجم', help='Current body weight.')
+        height = st.text_input('📏 Height', '175 سم', help='Client height.')
+        goal = st.text_input('🎯 Goal', 'بناء عضلي', help='Primary nutrition goal.')
     with c3:
-        duration = st.text_input('⏱️ Duration', '12 أسبوع')
-        meals_count_text = st.text_input('🍽️ Meals Count', '4 وجبات')
-        start_date = st.text_input('📅 Start Date', 'يونيو 2026')
+        duration = st.text_input('⏱️ Duration', '12 أسبوع', help='Plan duration.')
+        meals_count_text = st.text_input('🍽️ Meals Count', '4 وجبات', help='Number of meals per day.')
+        start_date = st.text_input('📅 Start Date', 'يونيو 2026', help='Program start month/year.')
     
-    notes = st.text_area('📝 Coach Notes', 'نظام مخصص بالكامل لزيادة الكتلة العضلية تحت إشراف المدرب أحمد تيكا', height=70)
+    notes = st.text_area('📝 Coach Notes', 'نظام مخصص بالكامل لزيادة الكتلة العضلية تحت إشراف المدرب أحمد تيكا', height=70,
+        help='Special notes from the coach.')
     
     st.markdown('---')
     st.markdown('## 📊 MACRONUTRIENTS')
@@ -80,8 +74,9 @@ with st.form('nutrition_form'):
     
     st.markdown('---')
     st.markdown('## 🍽️ MEALS')
+    st.markdown('<p class="section-desc">Configure each meal. Paste an image URL for the meal icon.</p>', unsafe_allow_html=True)
     
-    num_meals = st.number_input('Number of meals', 1, 8, 4)
+    num_meals = st.number_input('Number of meals', 1, 8, 4, help='How many meals in the plan? (1-8)')
     meals = []
     
     for i in range(int(num_meals)):
@@ -97,10 +92,11 @@ with st.form('nutrition_form'):
                 value=['الوجبة الأولى', 'الوجبة الثانية', 'الوجبة الثالثة', 'الوجبة الرابعة'][i] if i < 4 else f'الوجبة {i+1}',
                 key=f'type_{i}')
         with mc3:
-            icon_keys = list(MEAL_ICONS.keys())
-            meal_icon_display = st.selectbox(f'🖼️ Icon {i+1}', icon_keys,
-                index=i if i < len(icon_keys) else 0, key=f'micon_{i}')
-            meal_icon = MEAL_ICONS[meal_icon_display]
+            meal_icon_url = st.text_input(f'🖼️ Icon URL {i+1}',
+                value='',
+                key=f'micon_{i}',
+                placeholder='https://...',
+                help='Paste an image URL for the meal icon (e.g., from imgur.com)')
         
         mc4, mc5, mc6, mc7 = st.columns(4)
         with mc4:
@@ -143,7 +139,7 @@ with st.form('nutrition_form'):
                 ingredients.append(ing.strip())
         
         meals.append({
-            'name': meal_name, 'type': meal_type, 'icon': meal_icon,
+            'name': meal_name, 'type': meal_type, 'icon': meal_icon_url,
             'calories': meal_cal, 'protein': meal_protein,
             'carbs': meal_carbs, 'fat': meal_fat,
             'ingredients': ingredients, 'alternative': alternative,
@@ -192,10 +188,11 @@ with st.form('nutrition_form'):
     
     st.markdown('---')
     st.markdown('## 🍳 RECIPES')
+    st.markdown('<p class="section-desc">Paste image URLs for recipe photos. Also add YouTube links.</p>', unsafe_allow_html=True)
     
     recipes = []
     for i in range(6):
-        rc1, rc2, rc3 = st.columns([2, 2, 1])
+        rc1, rc2, rc3, rc4 = st.columns([2, 2, 1, 1])
         with rc1:
             rname = st.text_input(f'Name {i+1}',
                 value=['السيرة', 'صدور الدجاج', 'الأرز الصحي', 'سلطة فواكه', 'الباكيج الصحي', 'الوجبة السحرة'][i],
@@ -205,9 +202,12 @@ with st.form('nutrition_form'):
                 value=['شوربة احترافي', 'تتبيل مثالي وإتقان', 'طريقة طهي صحية', 'وصفة غنية غذائياً', 'بروتين + طاقة', 'سناكس مستقبلة'][i],
                 key=f'rdesc_{i}')
         with rc3:
-            rlink = st.text_input(f'Link {i+1}', 'https://youtube.com/watch?v=example', key=f'rlink_{i}')
+            rlink = st.text_input(f'Video Link {i+1}', 'https://youtube.com/watch?v=example', key=f'rlink_{i}')
+        with rc4:
+            rimage = st.text_input(f'Image URL {i+1}', '', key=f'rimage_{i}', placeholder='https://...',
+                help='Paste an image URL for the recipe photo')
         if rname.strip():
-            recipes.append({'name': rname.strip(), 'desc': rdesc.strip(), 'link': rlink.strip(), 'icon': 'plate'})
+            recipes.append({'name': rname.strip(), 'desc': rdesc.strip(), 'link': rlink.strip(), 'image': rimage.strip()})
     
     st.markdown('---')
     st.markdown('## 🧑‍🏫 COACH INFORMATION')
