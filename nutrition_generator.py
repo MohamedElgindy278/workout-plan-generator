@@ -210,24 +210,34 @@ def p1_cover(c, data):
     c.rect(0, 0, W, H, stroke=0, fill=1)
     stripe(c)
     
-    fill_rect(c, 0, H-50, W, 50, Color(0,0,0,0.8))
-    hline(c, 0, H-50, W, GREEN_MID, 1)
+    fill_rect(c, 0, H-52, W, 52, Color(0,0,0,0.85))
+    hline(c, 0, H-52, W, GREEN_MID, 1.2)
     tl(c, 'AHMED', STRIPE_W+16, H-32, 'P-Bold', 18, GREEN_MID)
-    tl(c, 'TEKA', STRIPE_W+82, H-32, 'P-Bold', 18, WHITE)
-    tr(c, 'NUTRITION COACH', W-16, H-32, 'P-Reg', 9, GRAY_LIGHT)
+    tl(c, 'TEKA', STRIPE_W+84, H-32, 'P-Bold', 18, WHITE)
+    hline(c, STRIPE_W+16, H-40, 100, GREEN_MID, 0.6)
+    tr(c, 'NUTRITION COACH', W-16, H-32, 'P-Reg', 8.5, GRAY_LIGHT)
     
-    ty = H - 135
-    tc(c, 'NUTRITION', W/2, ty+15, 'P-Bold', 52, WHITE)
-    tc(c, 'PLAN', W/2, ty-30, 'P-Bold', 52, GREEN_MID)
-    tc(c, 'Personalized Meal Plan', W/2, ty-55, 'P-Reg', 11, Color(1,1,1,0.6))
+    # MAIN TITLE
+    ty = H - 130
+    c.setStrokeColor(Color(1,1,1,0.4)); c.setLineWidth(1.2)
+    c.line(STRIPE_W+20, ty+30, STRIPE_W+20+50, ty+30)
+    c.line(W-20-50, ty+30, W-20, ty+30)
     
-    cy = ty - 100
-    rrect(c, STRIPE_W+16, cy, W-STRIPE_W-32, 56, 6, Color(0,0,0,0.75), GREEN_MID, 1)
-    fill_rect(c, STRIPE_W+16, cy, 4, 56, GREEN_MID)
-    tl(c, 'CLIENT', STRIPE_W+28, cy+40, 'P-Light', 8, GREEN_LIGHT)
-    tr(c, data.get('client_name', 'CLIENT'), W-24, cy+10, 'P-Bold', 28, WHITE)
+    tc(c, 'NUTRITION', W/2, ty+15, 'P-Bold', 48, WHITE)
+    tc(c, 'PLAN', W/2, ty-30, 'P-Bold', 48, GREEN_MID)
+    tc(c, 'Personalized Meal Plan', W/2, ty-55, 'P-Reg', 10, Color(1,1,1,0.6))
     
-    by = cy - 10
+    # BOTTOM ZONE - Like workout PDF
+    by = 130
+    
+    # Client card
+    rrect(c, STRIPE_W+16, by, W-STRIPE_W-32, 54, 6, Color(0,0,0,0.78), GREEN_MID, 1.2)
+    fill_rect(c, STRIPE_W+16, by, 4, 54, GREEN_MID)
+    tl(c, 'CLIENT', STRIPE_W+28, by+40, 'P-Light', 7, GREEN_LIGHT)
+    tl(c, data.get('client_name', 'CLIENT'), STRIPE_W+28, by+16, 'P-Bold', 28, WHITE)
+    tr(c, data.get('goal', 'FITNESS'), W-24, by+30, 'P-Reg', 8.5, GREEN_MID)
+    
+    # Three info pills - UNDER client card
     pw = (W - STRIPE_W - 36) / 3 - 5
     pills = [
         ('DURATION', data.get('duration', '12 WEEKS')),
@@ -236,15 +246,16 @@ def p1_cover(c, data):
     ]
     for i, (lbl, val) in enumerate(pills):
         px = STRIPE_W + 16 + i * (pw + 7.5)
-        rrect(c, px, by-55, pw, 46, 4, Color(0,0,0,0.65), GOLD2, 0.5)
-        tl(c, lbl, px+10, by-22, 'P-Light', 8, GRAY_LIGHT)
-        tl(c, val, px+10, by-42, 'P-Bold', 12, GREEN_MID)
+        rrect(c, px, by-58, pw, 50, 4, Color(0,0,0,0.70), GOLD2, 0.6)
+        tl(c, lbl, px+10, by-24, 'P-Light', 7, GRAY_LIGHT)
+        tl(c, val, px+10, by-44, 'P-Bold', 12, GREEN_MID)
     
-    fill_rect(c, 0, 0, W, 38, Color(0,0,0,0.85))
-    hline(c, 0, 38, W, GREEN_MID, 0.7)
-    tl(c, '@coach.teka1', STRIPE_W+16, 13, 'P-Reg', 9, GREEN_MID)
-    tc(c, '01033047057', W/2, 13, 'P-Reg', 9, GRAY_LIGHT)
-    tr(c, 'Coach Ahmed Teka', W-14, 13, 'P-Bold', 10, GREEN_MID)
+    # Footer
+    fill_rect(c, 0, 0, W, 40, Color(0,0,0,0.88))
+    hline(c, 0, 40, W, GREEN_MID, 0.8)
+    tl(c, '@coach.teka1', STRIPE_W+16, 15, 'P-Reg', 8, GREEN_MID)
+    tc(c, '01033047057', W/2, 15, 'P-Reg', 8, GRAY_LIGHT)
+    tr(c, f'Coach {data.get("coach_name", "AHMED TEKA")}', W-14, 15, 'P-Bold', 9, GREEN_MID)
     
     c.showPage()
 
