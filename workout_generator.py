@@ -422,12 +422,25 @@ def p_exercise(c, data, day_key, pgnum, accent=GOLD):
         tc(c, str(ex.get('reps', '10-12')), ccx[2], ey-17, 'Helvetica', 9, OFF_WHITE)
         tc(c, str(ex.get('rest', '90s')), ccx[3], ey-17, 'Helvetica', 8.5, SILVER)
         bcx2 = ccx[4]; bcy = ey - ROW_H/2
-        c.setFillColor(accent); c.circle(bcx2, bcy, 11, fill=1, stroke=0)
-        tc(c, '>', bcx2-1, bcy-4, 'Helvetica-Bold', 9, BG)
-        # Add clickable link
+
+        # Draw play button
+        c.setFillColor(accent)
+        c.circle(bcx2, bcy, 12, fill=1, stroke=1)
+        c.setStrokeColor(WHITE)
+        c.setLineWidth(1.5)
+
+        # Play triangle
+        c.setFillColor(BG)
+        p = c.beginPath()
+        p.moveTo(bcx2 - 4, bcy + 6)
+        p.lineTo(bcx2 - 4, bcy - 6)
+        p.lineTo(bcx2 + 5, bcy)
+        p.close()
+        c.drawPath(p, fill=1, stroke=0)
+
         ex_link = ex.get('link', '#')
         if ex_link and ex_link != '#':
-            c.linkURL(ex_link, (bcx2-11, bcy-11, bcx2+11, bcy+11))
+            c.linkURL(ex_link, (bcx2-12, bcy-12, bcx2+12, bcy+12))
         ey -= ROW_H
     
     hline(c, x, ey, cw, accent, 0.8)
