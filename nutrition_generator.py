@@ -308,13 +308,13 @@ def p3_meals(c, data):
         tr(c, meal.get('name', ''), x+cw-12, my-16, 'P-Bold', 13, BLACK)
         tr(c, meal.get('type', ''), x+cw-12, my-30, 'P-Reg', 8, GRAY)
         
-        # Calories + macros - CENTERED horizontally in the card
-        tc(c, f'{meal.get("calories", "0")} kcal', x + cw/2, my-48, 'P-Bold', 18, GREEN)
-        tc(c, f'P:{meal.get("protein","0")}g | C:{meal.get("carbs","0")}g | F:{meal.get("fat","0")}g', x + cw/2, my-62, 'P-Reg', 9, GRAY)
+        # Calories + macros - left side
+        tl(c, f'{meal.get("calories", "0")} kcal', x+56, my-44, 'P-Bold', 18, GREEN)
+        tl(c, f'P:{meal.get("protein","0")}g | C:{meal.get("carbs","0")}g | F:{meal.get("fat","0")}g', x+56, my-58, 'P-Reg', 9, GRAY)
         
-        # Ingredients - right side, BIGGER font
+        # Ingredients - right side
         ingredients = meal.get('ingredients', [])
-        ing_y = my - 48
+        ing_y = my - 44
         if isinstance(ingredients, list):
             for ing in ingredients[:4]:
                 tr(c, f'• {ing}', x+cw-12, ing_y, 'P-Reg', 11, GRAY_DARK)
@@ -322,13 +322,14 @@ def p3_meals(c, data):
         else:
             tr(c, f'• {ingredients[:55]}', x+cw-12, ing_y, 'P-Reg', 11, GRAY_DARK)
         
-        # Alternative - left side at bottom
+        # Alternative - left bottom
         alt = meal.get('alternative', '')
         if alt:
             tl(c, f'🔄 {alt[:60]}', x+12, my-mh+14, 'P-Reg', 9, GREEN)
         
         my -= mh + 3
     
+    # Total calories - CENTERED
     if my > FTR_H + 50:
         rrect(c, x, my-38, cw, 34, 7, GREEN_DIM, GREEN, 1)
         tc(c, f'Total: {data.get("total_calories", "0")} kcal/day', x + cw/2, my-16, 'P-Bold', 15, GREEN)
