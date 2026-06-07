@@ -35,7 +35,7 @@ for fp in FONT_PATHS:
             pass
 
 # ═══════════════════════════════════════════════
-# ARABIC HELPER - Reshape text for PDF
+# ARABIC HELPER
 # ═══════════════════════════════════════════════
 def ar(text):
     """Reshape Arabic text for proper display in PDF"""
@@ -77,7 +77,7 @@ STRIPE_W    = 4
 TOTAL_PAGES = 6
 
 # ═══════════════════════════════════════════════
-# PRIMITIVES - Auto-reshape Arabic text
+# PRIMITIVES - All English labels (LTR), Arabic values auto-reshaped
 # ═══════════════════════════════════════════════
 
 def fill_bg(c, col=None):
@@ -106,14 +106,17 @@ def rrect(c, x, y, w, h, r, fc, sc=None, sw=0.5):
     c.drawPath(p, fill=1, stroke=1 if sc else 0)
 
 def tl(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
+    """Left-aligned text - label on left, Arabic value reshaped"""
     c.setFillColor(col); c.setFont(f, sz)
     c.drawString(x, y, ar(s))
 
 def tc(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
+    """Center-aligned text"""
     c.setFillColor(col); c.setFont(f, sz)
     c.drawCentredString(x, y, ar(s))
 
 def tr(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
+    """Right-aligned text - Arabic starts from right"""
     c.setFillColor(col); c.setFont(f, sz)
     c.drawRightString(x, y, ar(s))
 
@@ -146,7 +149,7 @@ def wrap(c, text, x, y, maxw, f, sz, col, lh=None):
     return y
 
 # ═══════════════════════════════════════════════
-# CHROME
+# CHROME - All English
 # ═══════════════════════════════════════════════
 
 def chrome(c, section, pgnum, data):
@@ -163,7 +166,7 @@ def chrome(c, section, pgnum, data):
     tr(c, f'{pgnum} / {TOTAL_PAGES}', W-12, FTR_H/2-4, 'P-Bold', 8, GREEN)
 
 # ═══════════════════════════════════════════════
-# PAGE 1 - COVER
+# PAGE 1 - COVER (English labels, Arabic values right-aligned)
 # ═══════════════════════════════════════════════
 
 def p1_cover(c, data):
@@ -191,11 +194,13 @@ def p1_cover(c, data):
     tc(c, 'PLAN', W/2, ty-30, 'P-Bold', 48, GREEN_MID)
     tc(c, 'Personalized Meal Plan', W/2, ty-55, 'P-Reg', 10, Color(1,1,1,0.6))
     
+    # Client card - label LEFT, Arabic name RIGHT
     cy = ty - 100
     rrect(c, STRIPE_W+16, cy, W-STRIPE_W-32, 52, 6, Color(0,0,0,0.75), GREEN_MID, 1)
     fill_rect(c, STRIPE_W+16, cy, 4, 52, GREEN_MID)
     tl(c, 'CLIENT', STRIPE_W+28, cy+38, 'P-Light', 7, GREEN_LIGHT)
-    tl(c, data.get('client_name', 'CLIENT'), STRIPE_W+28, cy+14, 'P-Bold', 24, WHITE)
+    # Arabic name: right-aligned
+    tr(c, data.get('client_name', 'CLIENT'), W-24, cy+14, 'P-Bold', 24, WHITE)
     tr(c, data.get('goal', 'FITNESS'), W-24, cy+28, 'P-Reg', 8, GREEN_MID)
     
     by = cy - 8
@@ -220,7 +225,7 @@ def p1_cover(c, data):
     c.showPage()
 
 # ═══════════════════════════════════════════════
-# PAGE 2 - PROFILE
+# PAGE 2 - PROFILE (English labels LEFT, Arabic values RIGHT)
 # ═══════════════════════════════════════════════
 
 def p2_profile(c, data):
@@ -249,14 +254,15 @@ def p2_profile(c, data):
         
         rrect(c, ix, iy-38, bw, 36, 5, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, ix, iy-38, 3, 36, GREEN)
-        tl(c, lbl, ix+10, iy-12, 'P-Light', 7, GRAY)
-        tl(c, val, ix+10, iy-28, 'P-Bold', 12, BLACK)
+        # Label LEFT, Value RIGHT
+        tl(c, lbl, ix+10, iy-28, 'P-Light', 7, GRAY)
+        tr(c, val, ix+bw-10, iy-28, 'P-Bold', 12, BLACK)
     
     ny = py - 115
     if data.get('notes'):
         rrect(c, x, ny-38, cw, 36, 5, WHITE, GREEN_DIM, 0.4)
-        tl(c, 'COACH NOTES', x+10, ny-12, 'P-Bold', 9, GREEN)
-        tl(c, data.get('notes', '')[:85], x+10, ny-28, 'P-Reg', 8, GRAY)
+        tl(c, 'COACH NOTES:', x+10, ny-12, 'P-Bold', 9, GREEN)
+        tr(c, data.get('notes', '')[:60], x+cw-10, ny-28, 'P-Reg', 8, GRAY)
         ny -= 50
     
     my = ny - 55
@@ -282,7 +288,7 @@ def p2_profile(c, data):
     c.showPage()
 
 # ═══════════════════════════════════════════════
-# PAGE 3 - MEALS
+# PAGE 3 - MEALS (English headers, Arabic content right-aligned)
 # ═══════════════════════════════════════════════
 
 def p3_meals(c, data):
@@ -307,8 +313,9 @@ def p3_meals(c, data):
         circle(c, x+28, my-22, 16, GREEN_DIM)
         tc(c, icon, x+28, my-26, 'P-Reg', 15, BLACK)
         
-        tl(c, meal.get('name', ''), x+52, my-12, 'P-Bold', 11, BLACK)
-        tl(c, meal.get('type', ''), x+52, my-24, 'P-Reg', 7, GRAY)
+        # Arabic content RIGHT-aligned
+        tr(c, meal.get('name', ''), x+cw-12, my-12, 'P-Bold', 11, BLACK)
+        tr(c, meal.get('type', ''), x+cw-12, my-24, 'P-Reg', 7, GRAY)
         
         tl(c, f'{meal.get("calories", "0")} kcal', x+52, my-40, 'P-Bold', 17, GREEN)
         tl(c, f'P:{meal.get("protein","0")}g  C:{meal.get("carbs","0")}g  F:{meal.get("fat","0")}g', x+52, my-52, 'P-Reg', 7, GRAY)
@@ -317,14 +324,14 @@ def p3_meals(c, data):
         ing_y = my - 65
         if isinstance(ingredients, list):
             for ing in ingredients[:4]:
-                tl(c, f'• {ing}', x+52, ing_y, 'P-Reg', 7, GRAY)
+                tr(c, f'• {ing}', x+cw-12, ing_y, 'P-Reg', 7, GRAY)
                 ing_y -= 10
         else:
-            tl(c, f'• {ingredients[:55]}', x+52, ing_y, 'P-Reg', 7, GRAY)
+            tr(c, f'• {ingredients[:55]}', x+cw-12, ing_y, 'P-Reg', 7, GRAY)
         
         alt = meal.get('alternative', '')
         if alt:
-            tl(c, f'🔄 {alt[:60]}', x+52, ing_y-2, 'P-Reg', 6, GREEN)
+            tr(c, f'🔄 {alt[:60]}', x+cw-12, ing_y-2, 'P-Reg', 6, GREEN)
         
         my -= mh + 3
     
@@ -370,11 +377,12 @@ def p4_guidelines(c, data):
         rrect(c, gx, gyy-42, gw, 38, 5, WHITE, GREEN_DIM, 0.3)
         fill_rect(c, gx, gyy-42, 3, 38, GREEN)
         tl(c, title, gx+8, gyy-16, 'P-Bold', 9, GREEN)
-        wrap(c, body[:45], gx+8, gyy-28, gw-12, 'P-Reg', 7, GRAY, lh=10)
+        tr(c, body[:35], gx+gw-8, gyy-28, 'P-Reg', 7, GRAY)
     
     oy = gy - 125
     rrect(c, x, oy-28, cw, 24, 5, WHITE, GREEN_DIM, 0.4)
-    tl(c, f'🐟 Omega-3: {data.get("omega", "")}', x+10, oy-12, 'P-Reg', 8, GREEN)
+    tl(c, '🐟 Omega-3:', x+10, oy-12, 'P-Bold', 8, GREEN)
+    tr(c, data.get('omega', ''), x+cw-10, oy-12, 'P-Reg', 8, GRAY)
     
     sy = oy - 42
     tc(c, 'SUPPLEMENTS', x + cw/2, sy, 'P-Bold', 13, GREEN)
@@ -387,7 +395,7 @@ def p4_guidelines(c, data):
         circle(c, x+16, sr-12, 9, GREEN)
         tc(c, str(i+1), x+16, sr-14, 'P-Bold', 6, WHITE)
         tl(c, sup.get('name', ''), x+30, sr-6, 'P-Bold', 9, BLACK)
-        tl(c, f'{sup.get("dose", "")} - {sup.get("benefit", "")}'[:50], x+30, sr-16, 'P-Reg', 6, GRAY)
+        tr(c, f'{sup.get("dose", "")} - {sup.get("benefit", "")}'[:40], x+cw-10, sr-16, 'P-Reg', 6, GRAY)
     
     c.showPage()
 
