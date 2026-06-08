@@ -669,7 +669,7 @@ def p6_coach(c, data):
     bx_start = W/2 - total_w/2
     
     for i, (lbl, color) in enumerate([
-            (f'@{data.get("instagram", "@coach.teka1")}', GREEN_MID),
+            (f'{data.get("instagram", "@coach.teka1")}', GREEN_MID),
             (data.get('phone', '01033047057'), GOLD2),
         ]):
             bx = bx_start + i*(btn_w+12)
