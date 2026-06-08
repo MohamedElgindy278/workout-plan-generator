@@ -75,7 +75,6 @@ def _download_amiri():
     return paths
 
 def setup_fonts():
-    """Initialize all fonts with automatic fallbacks."""
     # 1. Latin fonts
     for reg_path, bold_path in LATIN_PATHS:
         if os.path.exists(reg_path):
@@ -95,6 +94,13 @@ def setup_fonts():
             except:
                 pass
 
+    # ✅ Fallback لو مفيش font اتسجل
+    if FONT_MAP.get('P-Reg') == 'Helvetica' or 'P-Reg' not in pdfmetrics._fonts:
+        FONT_MAP['P-Reg']   = 'Helvetica'
+        FONT_MAP['P-Bold']  = 'Helvetica-Bold'
+        FONT_MAP['P-Light'] = 'Helvetica'
+        FONT_MAP['P-Med']   = 'Helvetica'
+
     # 2. Arabic fonts
     arabic_ok = False
     for reg_path, bold_path in ARABIC_PATHS:
@@ -103,7 +109,7 @@ def setup_fonts():
             arabic_ok = True
             break
 
-    # 3. Auto-download Amiri if no Arabic font found
+    # 3. Auto-download Amiri
     if not arabic_ok:
         downloaded = _download_amiri()
         _register('AR-Reg', downloaded.get('AR-Reg'), 'Helvetica')
