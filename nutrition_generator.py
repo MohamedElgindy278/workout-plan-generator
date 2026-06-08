@@ -665,13 +665,11 @@ def p6_coach(c, data):
     c.rect(0, 0, W, H, stroke=0, fill=1)
     stripe(c)
 
-    # اسم الكوتش فوق الصفحة مكان الهيدر
-    fill_rect(c, 0, H-48, W, 48, Color(0,0,0,0.8))
-    hline(c, 0, H-48, W, GREEN_MID, 0.8)
-    tc(c, data.get('coach_name', 'AHMED TEKA'), W/2, H-30, 'P-Bold', 48, GREEN_MID)
+    fill_rect(c, 0, H-60, W, 60, Color(0,0,0,0.8))
+    hline(c, 0, H-60, W, GREEN_MID, 0.8)
+    tc(c, data.get('coach_name', 'AHMED TEKA'), W/2, H-45, 'P-Bold', 48, GREEN_MID)
 
     cy = H * 0.55
-    tc(c, 'NUTRITION COACH', W/2, cy, 'P-Reg', 14, WHITE)
 
     fill_rect(c, 0, 0, W, 75, Color(0,0,0,0.8))
     hline(c, 0, 75, W, GREEN_MID, 0.7)
