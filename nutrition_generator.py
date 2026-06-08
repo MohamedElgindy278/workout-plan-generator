@@ -22,12 +22,14 @@ FONT_PATHS = [
     ('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'),
 ]
 
+P_BOLD_LOADED = False
 for reg_path, bold_path in FONT_PATHS:
     if os.path.exists(reg_path):
         try:
             pdfmetrics.registerFont(TTFont('P-Reg', reg_path))
             if os.path.exists(bold_path):
                 pdfmetrics.registerFont(TTFont('P-Bold', bold_path))
+                P_BOLD_LOADED = True
             else:
                 pdfmetrics.registerFont(TTFont('P-Bold', reg_path))
             pdfmetrics.registerFont(TTFont('P-Light', reg_path))
@@ -35,6 +37,16 @@ for reg_path, bold_path in FONT_PATHS:
             break
         except:
             pass
+
+# Fallback if no fonts registered
+if not P_BOLD_LOADED:
+    try:
+        pdfmetrics.registerFont(TTFont('P-Reg', reg_path))
+        pdfmetrics.registerFont(TTFont('P-Bold', reg_path))
+        pdfmetrics.registerFont(TTFont('P-Light', reg_path))
+        pdfmetrics.registerFont(TTFont('P-Med', reg_path))
+    except:
+        pass
 
 # ═══════════════════════════════════════════════
 # ARABIC HELPER
@@ -335,8 +347,6 @@ def p2_profile(c, data):
 # ═══════════════════════════════════════════════
 
 def p3_meals(c, data):
-    # Don't fill background first - let the image show
-    # Then draw image at full opacity
     bg_image = 'images/p3MEAlS.png'
     try:
         if os.path.exists(bg_image):
