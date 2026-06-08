@@ -481,7 +481,7 @@ def p3_meals(c, data):
 
         # Meal name & type — Arabic auto-detected
         tr(c, meal.get('name', ''), x+cw-12, my-16, 'P-Bold', 15, BLACK)
-        tr(c, meal.get('type', ''), x+cw-12, my-30, 'P-Reg',  10, GRAY)
+        tr(c, meal.get('type', ''), x+cw-12, my-32, 'P-Reg',  10, GRAY)
 
         # Calories & macros — always English format
         tl(c, f'{meal.get("calories", "0")} kcal', x+56, my-44, 'P-Bold', 22, GREEN)
@@ -490,7 +490,7 @@ def p3_meals(c, data):
 
         # Ingredients — Arabic auto-detected
         ingredients = meal.get('ingredients', [])
-        ing_y = my - 44
+        ing_y = my - 48
         if isinstance(ingredients, list):
             for ing in ingredients[:4]:
                 tr(c, f'• {ing}', x+cw-12, ing_y, 'P-Reg', 13, GRAY_DARK)
