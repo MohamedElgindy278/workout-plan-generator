@@ -12,30 +12,32 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 
 W, H = A4
-
 # ═══════════════════════════════════════════════
 # FONTS - Same logic as workout_generator.py
 # ═══════════════════════════════════════════════
-FONT_PATHS = [
-    'C:/Windows/Fonts/arial.ttf',
-    '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-    '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-]
-
-for fp in FONT_PATHS:
-    if os.path.exists(fp):
-        try:
-            pdfmetrics.registerFont(TTFont('P-Reg', fp))
-            bold_path = fp.replace('.ttf','bd.ttf').replace('Sans','Sans-Bold').replace('Regular','Bold')
-            if os.path.exists(bold_path):
-                pdfmetrics.registerFont(TTFont('P-Bold', bold_path))
-            else:
-                pdfmetrics.registerFont(TTFont('P-Bold', fp))
-            pdfmetrics.registerFont(TTFont('P-Light', fp))
-            pdfmetrics.registerFont(TTFont('P-Med', fp))
+try:
+    font_paths = [
+        'C:/Windows/Fonts/arial.ttf',
+        '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+        '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+    ]
+    font_path = None
+    for fp in font_paths:
+        if os.path.exists(fp):
+            font_path = fp
             break
-        except:
-            pass
+    
+    if font_path:
+        pdfmetrics.registerFont(TTFont('P-Reg', font_path))
+        bold_path = font_path.replace('.ttf','bd.ttf').replace('Sans','Sans-Bold').replace('Regular','Bold')
+        if os.path.exists(bold_path):
+            pdfmetrics.registerFont(TTFont('P-Bold', bold_path))
+        else:
+            pdfmetrics.registerFont(TTFont('P-Bold', font_path))
+        pdfmetrics.registerFont(TTFont('P-Light', font_path))
+        pdfmetrics.registerFont(TTFont('P-Med', font_path))
+except:
+    pass 
 
 # ═══════════════════════════════════════════════
 # ARABIC HELPER
