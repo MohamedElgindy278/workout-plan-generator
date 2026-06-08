@@ -669,22 +669,20 @@ def p6_coach(c, data):
     bx_start = W/2 - total_w/2
     
     for i, (lbl, color) in enumerate([
-        (f'@{data.get("instagram", "@coach.teka1")}', GREEN_MID),
-        (data.get('phone', '01033047057'), GOLD2),
-    ]):
-        bx = bx_start + i*(btn_w+12)
-        by = 22
-        rrect(c, bx, by, btn_w, btn_h, 5, Color(0,0,0,0.4), color, 1)
-        tc(c, lbl, bx+btn_w/2, by+btn_h/2-4, 'P-Bold', 10, WHITE)
-    
-    # ✅ Instagram button فقط
-    if i == 0:
-        insta = data.get('instagram', 'coach.teka1').lstrip('@')
-        c.linkURL(
-            f'https://www.instagram.com/{insta}',
-            (bx, by, bx+btn_w, by+btn_h),
-            relative=0
-        )
+            (f'@{data.get("instagram", "@coach.teka1")}', GREEN_MID),
+            (data.get('phone', '01033047057'), GOLD2),
+        ]):
+            bx = bx_start + i*(btn_w+12)
+            by = 22
+            rrect(c, bx, by, btn_w, btn_h, 5, Color(0,0,0,0.4), color, 1)
+            tc(c, lbl, bx+btn_w/2, by+btn_h/2-4, 'P-Bold', 10, WHITE)
+            if i == 0:
+                insta = data.get('instagram', 'coach.teka1').lstrip('@')
+                c.linkURL(
+                    f'https://www.instagram.com/{insta}',
+                    (bx, by, bx+btn_w, by+btn_h),
+                    relative=0
+                )
     
     tr(c, f'{TOTAL_PAGES} / {TOTAL_PAGES}', W-14, 85, 'P-Bold', 9, GREEN_MID)
     
