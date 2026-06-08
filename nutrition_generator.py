@@ -1,5 +1,6 @@
 import os
 import io
+import urllib.request
 import requests
 from PIL import Image
 from io import BytesIO
@@ -12,6 +13,128 @@ import arabic_reshaper
 from bidi.algorithm import get_display
 
 W, H = A4
+
+# ═══════════════════════════════════════════════
+# FONT SYSTEM - Works on Windows + Linux + Cloud
+# ═══════════════════════════════════════════════
+
+FONT_MAP = {
+    'P-Reg':   'Helvetica',
+    'P-Bold':  'Helvetica-Bold',
+    'P-Light': 'Helvetica',
+    'P-Med':   'Helvetica',
+    'AR-Reg':  'Helvetica',
+    'AR-Bold': 'Helvetica-Bold',
+}
+
+# Amiri Arabic font - auto-download if missing
+AMIRI_URLS = {
+    'AR-Reg':  'https://github.com/google/fonts/raw/main/ofl/amiri/Amiri-Regular.ttf',
+    'AR-Bold': 'https://github.com/google/fonts/raw/main/ofl/amiri/Amiri-Bold.ttf',
+}
+
+# Latin font search paths (Windows → Linux)
+LATIN_PATHS = [
+    ('C:/Windows/Fonts/arial.ttf',                                       'C:/Windows/Fonts/arialbd.ttf'),
+    ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',                  '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'),
+    ('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',  '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'),
+]
+
+# Arabic font search paths (Local → Windows → Linux)
+ARABIC_PATHS = [
+    ('fonts/Amiri-Regular.ttf',                                   'fonts/Amiri-Bold.ttf'),
+    ('C:/Windows/Fonts/arial.ttf',                                'C:/Windows/Fonts/arialbd.ttf'),
+    ('/usr/share/fonts/truetype/amiri/amiri.ttf',                 '/usr/share/fonts/truetype/amiri/amiri-bold.ttf'),
+    ('/usr/share/fonts/truetype/noto/NotoSansArabic-Regular.ttf', '/usr/share/fonts/truetype/noto/NotoSansArabic-Bold.ttf'),
+]
+
+def _register(alias, path, fallback):
+    """Register a TTFont. Returns True on success."""
+    if path and os.path.exists(path):
+        try:
+            pdfmetrics.registerFont(TTFont(alias, path))
+            FONT_MAP[alias] = alias
+            return True
+        except:
+            pass
+    FONT_MAP[alias] = fallback
+    return False
+
+def _download_amiri():
+    """Download Amiri Arabic fonts if not present locally."""
+    os.makedirs('fonts', exist_ok=True)
+    paths = {}
+    for alias, url in AMIRI_URLS.items():
+        dest = f'fonts/Amiri-{"Regular" if "Reg" in alias else "Bold"}.ttf'
+        if not os.path.exists(dest):
+            try:
+                urllib.request.urlretrieve(url, dest)
+            except:
+                dest = None
+        paths[alias] = dest
+    return paths
+
+def setup_fonts():
+    """Initialize all fonts with automatic fallbacks."""
+    # 1. Latin fonts
+    for reg_path, bold_path in LATIN_PATHS:
+        if os.path.exists(reg_path):
+            try:
+                pdfmetrics.registerFont(TTFont('P-Reg', reg_path))
+                pdfmetrics.registerFont(TTFont('P-Light', reg_path))
+                pdfmetrics.registerFont(TTFont('P-Med', reg_path))
+                FONT_MAP['P-Reg'] = FONT_MAP['P-Light'] = FONT_MAP['P-Med'] = 'P-Reg'
+                
+                if os.path.exists(bold_path):
+                    pdfmetrics.registerFont(TTFont('P-Bold', bold_path))
+                    FONT_MAP['P-Bold'] = 'P-Bold'
+                else:
+                    pdfmetrics.registerFont(TTFont('P-Bold', reg_path))
+                    FONT_MAP['P-Bold'] = 'P-Reg'
+                break
+            except:
+                pass
+
+    # 2. Arabic fonts
+    arabic_ok = False
+    for reg_path, bold_path in ARABIC_PATHS:
+        if _register('AR-Reg', reg_path, 'Helvetica'):
+            _register('AR-Bold', bold_path, FONT_MAP.get('AR-Reg', 'Helvetica'))
+            arabic_ok = True
+            break
+
+    # 3. Auto-download Amiri if no Arabic font found
+    if not arabic_ok:
+        downloaded = _download_amiri()
+        _register('AR-Reg', downloaded.get('AR-Reg'), 'Helvetica')
+        _register('AR-Bold', downloaded.get('AR-Bold'), FONT_MAP.get('AR-Reg', 'Helvetica'))
+
+setup_fonts()
+
+# ═══════════════════════════════════════════════
+# ARABIC TEXT PROCESSING
+# ═══════════════════════════════════════════════
+
+def ar(text):
+    """Reshape + reorder Arabic text for proper PDF rendering."""
+    try:
+        s = str(text)
+        if any('\u0600' <= ch <= '\u06ff' for ch in s):
+            reshaped = arabic_reshaper.reshape(s)
+            return get_display(reshaped)
+        return s
+    except:
+        return str(text)
+
+def is_arabic(text):
+    """Check if text contains Arabic characters."""
+    return any('\u0600' <= ch <= '\u06ff' for ch in str(text))
+
+def _select_font(f, text):
+    """Select appropriate font based on text language."""
+    if is_arabic(str(text)):
+        return 'AR-Bold' if 'Bold' in f else 'AR-Reg'
+    return f
 
 # ═══════════════════════════════════════════════
 # COLORS
@@ -31,130 +154,22 @@ GRAY_LIGHT  = HexColor('#999999')
 WHITE       = HexColor('#FFFFFF')
 BLACK       = HexColor('#111111')
 
-# ═══════════════════════════════════════
-# FONT SETUP
-# ═══════════════════════════════════════
+# ═══════════════════════════════════════════════
+# LAYOUT CONSTANTS
+# ═══════════════════════════════════════════════
+M           = 24
+HDR_H       = 44
+FTR_H       = 34
+STRIPE_W    = 4
+TOTAL_PAGES = 6
 
-ARABIC_FONT_PATHS = [
-    # Local (في فولدر fonts/ جنب الكود)
-    ('fonts/Amiri-Regular.ttf',  'fonts/Amiri-Bold.ttf'),
-    ('fonts/Cairo-Regular.ttf',  'fonts/Cairo-Bold.ttf'),
-    # Linux system fonts
-    ('/usr/share/fonts/truetype/amiri/amiri.ttf',       '/usr/share/fonts/truetype/amiri/amiri-bold.ttf'),
-    ('/usr/share/fonts/truetype/cairo/Cairo-Regular.ttf', '/usr/share/fonts/truetype/cairo/Cairo-Bold.ttf'),
-]
-
-LATIN_FONT_PATHS = [
-    ('C:/Windows/Fonts/arial.ttf',                                    'C:/Windows/Fonts/arialbd.ttf'),
-    ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',               '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'),
-    ('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'),
-]
-
-FONT_MAP = {
-    'P-Reg':   'Helvetica',
-    'P-Bold':  'Helvetica-Bold',
-    'P-Light': 'Helvetica',
-    'P-Med':   'Helvetica',
-    'AR-Reg':  'Helvetica',
-    'AR-Bold': 'Helvetica-Bold',
-}
-
-def _try_register(alias, path, fallback):
-    if os.path.exists(path):
-        try:
-            pdfmetrics.registerFont(TTFont(alias, path))
-            FONT_MAP[alias] = alias
-            print(f"[Fonts] ✅ {alias} → {path}")
-            return True
-        except Exception as e:
-            print(f"[Fonts] ❌ {alias} failed: {e}")
-    FONT_MAP[alias] = fallback
-    return False
-
-def setup_fonts():
-    # Latin fonts
-    for reg_path, bold_path in LATIN_FONT_PATHS:
-        if os.path.exists(reg_path):
-            try:
-                pdfmetrics.registerFont(TTFont('P-Reg',   reg_path))
-                pdfmetrics.registerFont(TTFont('P-Light', reg_path))
-                pdfmetrics.registerFont(TTFont('P-Med',   reg_path))
-                FONT_MAP['P-Reg'] = FONT_MAP['P-Light'] = FONT_MAP['P-Med'] = 'P-Reg'
-                if os.path.exists(bold_path):
-                    pdfmetrics.registerFont(TTFont('P-Bold', bold_path))
-                    FONT_MAP['P-Bold'] = 'P-Bold'
-                else:
-                    pdfmetrics.registerFont(TTFont('P-Bold', reg_path))
-                    FONT_MAP['P-Bold'] = 'P-Bold'
-                print(f"[Fonts] ✅ Latin → {reg_path}")
-                break
-            except Exception as e:
-                print(f"[Fonts] ❌ Latin failed: {e}")
-
-    # Arabic fonts
-    arabic_loaded = False
-    for reg_path, bold_path in ARABIC_FONT_PATHS:
-        reg_ok  = _try_register('AR-Reg',  reg_path,  'Helvetica')
-        bold_ok = _try_register('AR-Bold', bold_path, 'Helvetica-Bold')
-        if reg_ok:
-            arabic_loaded = True
-            break
-
-    if not arabic_loaded:
-        print("[Fonts] ⚠️ No Arabic font found — Arabic text will NOT render correctly!")
-        print("[Fonts]    → Add fonts/Amiri-Regular.ttf or fonts/Cairo-Regular.ttf")
-
-setup_fonts()
-
-# ═══════════════════════════════════════
-# ARABIC HELPER
-# ═══════════════════════════════════════
-
-def ar(text):
-    """Reshape + bidi Arabic text so it renders correctly in PDF."""
-    try:
-        s = str(text)
-        if any('\u0600' <= ch <= '\u06ff' for ch in s):
-            reshaped = arabic_reshaper.reshape(s)
-            return get_display(reshaped)
-        return s
-    except:
-        return str(text)
-
-def is_arabic(text):
-    return any('\u0600' <= ch <= '\u06ff' for ch in str(text))
-
-# ═══════════════════════════════════════
-# DRAW HELPERS  
-# ═══════════════════════════════════════
-
-def tl(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    if is_arabic(str(s)):
-        f = 'AR-Bold' if 'Bold' in f else 'AR-Reg'
-    c.setFillColor(col)
-    c.setFont(FONT_MAP.get(f, f), sz)
-    c.drawString(x, y, ar(s))
-
-def tc(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    if is_arabic(str(s)):
-        f = 'AR-Bold' if 'Bold' in f else 'AR-Reg'
-    c.setFillColor(col)
-    c.setFont(FONT_MAP.get(f, f), sz)
-    c.drawCentredString(x, y, ar(s))
-
-def tr(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    if is_arabic(str(s)):
-        f = 'AR-Bold' if 'Bold' in f else 'AR-Reg'
-    c.setFillColor(col)
-    c.setFont(FONT_MAP.get(f, f), sz)
-    c.drawRightString(x, y, ar(s))
 # ═══════════════════════════════════════════════
 # IMAGE LOADER
 # ═══════════════════════════════════════════════
 temp_images = []
 
 def load_image_from_url(url, max_size=(200, 200)):
-    """Download image from URL, return temp path"""
+    """Download image from URL, return temp file path."""
     if not url or url == '#' or not url.startswith('http'):
         return None
     try:
@@ -167,28 +182,17 @@ def load_image_from_url(url, max_size=(200, 200)):
         img.save(temp_path, 'JPEG', quality=85)
         temp_images.append(temp_path)
         return temp_path
-    except Exception as e:
-        print(f"Failed to load image {url}: {e}")
+    except:
         return None
 
 def cleanup_temp_images():
-    """Remove temporary image files"""
+    """Remove temporary image files."""
     for path in temp_images:
         try:
             if os.path.exists(path):
                 os.remove(path)
         except:
             pass
-
-
-# ═══════════════════════════════════════════════
-# LAYOUT
-# ═══════════════════════════════════════════════
-M           = 24
-HDR_H       = 44
-FTR_H       = 34
-STRIPE_W    = 4
-TOTAL_PAGES = 6
 
 # ═══════════════════════════════════════════════
 # PRIMITIVES
@@ -220,13 +224,25 @@ def rrect(c, x, y, w, h, r, fc, sc=None, sw=0.5):
     c.drawPath(p, fill=1, stroke=1 if sc else 0)
 
 def tl(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    c.setFillColor(col); c.setFont(FONT_MAP.get(f, f), sz); c.drawString(x, y, ar(s))
+    """Left-aligned text with auto font selection."""
+    font = FONT_MAP.get(_select_font(f, s), f)
+    c.setFillColor(col)
+    c.setFont(font, sz)
+    c.drawString(x, y, ar(s))
 
 def tc(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    c.setFillColor(col); c.setFont(FONT_MAP.get(f, f), sz); c.drawCentredString(x, y, ar(s))
+    """Center-aligned text with auto font selection."""
+    font = FONT_MAP.get(_select_font(f, s), f)
+    c.setFillColor(col)
+    c.setFont(font, sz)
+    c.drawCentredString(x, y, ar(s))
 
 def tr(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
-    c.setFillColor(col); c.setFont(FONT_MAP.get(f, f), sz); c.drawRightString(x, y, ar(s))
+    """Right-aligned text with auto font selection."""
+    font = FONT_MAP.get(_select_font(f, s), f)
+    c.setFillColor(col)
+    c.setFont(font, sz)
+    c.drawRightString(x, y, ar(s))
 
 def hline(c, x, y, w, col=GREEN, lw=1.0):
     c.setStrokeColor(col); c.setLineWidth(lw); c.line(x, y, x+w, y)
@@ -243,23 +259,24 @@ def content_area():
     return x, H - HDR_H - M, w
 
 def wrap(c, text, x, y, maxw, f, sz, col, lh=None):
+    """Word-wrap with auto font selection for Arabic/English."""
     lh = lh or sz * 1.55
-    if is_arabic(str(text)):
-        f = 'AR-Bold' if 'Bold' in f else 'AR-Reg'
-    mapped_f = FONT_MAP.get(f, f)
-    c.setFillColor(col); c.setFont(mapped_f, sz)
+    font = FONT_MAP.get(_select_font(f, text), f)
+    c.setFillColor(col)
+    c.setFont(font, sz)
     words = ar(text).split()
     line = []
     for word in words:
-        if c.stringWidth(' '.join(line + [word]), mapped_f, sz) <= maxw:
+        if c.stringWidth(' '.join(line + [word]), font, sz) <= maxw:
             line.append(word)
         else:
             if line: c.drawString(x, y, ' '.join(line)); y -= lh
             line = [word]
     if line: c.drawString(x, y, ' '.join(line)); y -= lh
     return y
+
 # ═══════════════════════════════════════════════
-# CHROME
+# CHROME (Header + Footer)
 # ═══════════════════════════════════════════════
 
 def chrome(c, section, pgnum, data):
@@ -293,7 +310,6 @@ def p1_cover(c, data):
     c.rect(0, 0, W, H, stroke=0, fill=1)
     stripe(c)
     
-    # TOP BAR
     fill_rect(c, 0, H-52, W, 52, Color(0,0,0,0.85))
     hline(c, 0, H-52, W, GREEN_MID, 1.2)
     tl(c, 'AHMED', STRIPE_W+16, H-32, 'P-Bold', 18, GREEN_MID)
@@ -301,7 +317,6 @@ def p1_cover(c, data):
     hline(c, STRIPE_W+16, H-40, 100, GREEN_MID, 0.6)
     tr(c, 'NUTRITION COACH', W-16, H-32, 'P-Reg', 8.5, GRAY_LIGHT)
     
-    # MAIN TITLE
     ty = H - 130
     c.setStrokeColor(Color(1,1,1,0.4)); c.setLineWidth(1.2)
     c.line(STRIPE_W+20, ty+30, STRIPE_W+20+50, ty+30)
@@ -311,14 +326,12 @@ def p1_cover(c, data):
     tc(c, 'PLAN', W/2, ty-30, 'P-Bold', 48, GREEN_MID)
     tc(c, 'Personalized Meal Plan', W/2, ty-55, 'P-Reg', 10, Color(1,1,1,0.6))
     
-    # CLIENT CARD - Name only, no goal
     by = 130
     rrect(c, STRIPE_W+16, by, W-STRIPE_W-32, 54, 6, Color(0,0,0,0.78), GREEN_MID, 1.2)
     fill_rect(c, STRIPE_W+16, by, 4, 54, GREEN_MID)
     tl(c, 'CLIENT', STRIPE_W+28, by+40, 'P-Light', 7, GREEN_LIGHT)
     tr(c, data.get('client_name', 'CLIENT'), W-24, by+16, 'P-Bold', 28, WHITE)
     
-    # Three info pills
     pw = (W - STRIPE_W - 36) / 3 - 5
     pills = [
         ('DURATION', data.get('duration', '12 WEEKS')),
@@ -329,12 +342,11 @@ def p1_cover(c, data):
         px = STRIPE_W + 16 + i * (pw + 7.5)
         rrect(c, px, by-58, pw, 50, 4, Color(0,0,0,0.70), GOLD2, 0.6)
         tl(c, lbl, px+10, by-24, 'P-Light', 7, GRAY_LIGHT)
-        if any('\u0600' <= c2 <= '\u06ff' for c2 in str(val)):
+        if is_arabic(str(val)):
             tr(c, val, px+pw-10, by-44, 'P-Bold', 12, GREEN_MID)
         else:
             tl(c, val, px+10, by-44, 'P-Bold', 12, GREEN_MID)
     
-    # Footer
     fill_rect(c, 0, 0, W, 40, Color(0,0,0,0.88))
     hline(c, 0, 40, W, GREEN_MID, 0.8)
     tl(c, '@coach.teka1', STRIPE_W+16, 15, 'P-Reg', 8, GREEN_MID)
@@ -361,7 +373,7 @@ def p2_profile(c, data):
         ('AGE', data.get('age', 'N/A')),
         ('WEIGHT', data.get('weight', 'N/A')),
         ('HEIGHT', data.get('height', 'N/A')),
-        ('GOAL', data.get('goal', 'N/A')),  # Goal moved to profile page
+        ('GOAL', data.get('goal', 'N/A')),
     ]
     
     bw = (cw - 10) / 2
@@ -375,7 +387,7 @@ def p2_profile(c, data):
         fill_rect(c, ix, iy-42, 3, 40, GREEN)
         tl(c, lbl, ix+10, iy-14, 'P-Light', 8, GRAY)
         
-        if any('\u0600' <= c2 <= '\u06ff' for c2 in str(val)):
+        if is_arabic(str(val)):
             tr(c, val, ix+bw-10, iy-14, 'P-Bold', 14, BLACK)
         else:
             tl(c, val, ix+10, iy-14, 'P-Bold', 14, BLACK)
@@ -385,7 +397,7 @@ def p2_profile(c, data):
         rrect(c, x, ny-42, cw, 40, 5, WHITE, GREEN_DIM, 0.4)
         tl(c, 'COACH NOTES:', x+10, ny-14, 'P-Bold', 10, GREEN)
         notes_text = data.get('notes', '')
-        if any('\u0600' <= c2 <= '\u06ff' for c2 in str(notes_text)):
+        if is_arabic(str(notes_text)):
             tr(c, notes_text[:70], x+cw-10, ny-14, 'P-Reg', 10, GRAY)
         else:
             tl(c, notes_text[:70], x+10, ny-14, 'P-Reg', 10, GRAY)
@@ -425,7 +437,6 @@ def p3_meals(c, data):
     except:
         fill_bg(c, BG_CREAM)
     
-    # Very light overlay to make text readable
     c.setFillColor(Color(1, 1, 1, 0.75))
     c.rect(0, 0, W, H, stroke=0, fill=1)
     
@@ -481,7 +492,9 @@ def p3_meals(c, data):
         rrect(c, x, my-38, cw, 34, 7, GREEN_DIM, GREEN, 1)
         tc(c, f'Total: {data.get("total_calories", "0")} kcal/day', x + cw/2, my-16, 'P-Bold', 15, GREEN)
     
-    c.showPage()# ═══════════════════════════════════════════════
+    c.showPage()
+
+# ═══════════════════════════════════════════════
 # PAGE 4 - GUIDELINES
 # ═══════════════════════════════════════════════
 
@@ -573,14 +586,12 @@ def p5_recipes(c, data):
         
         rrect(c, rx, ryy-110, rw, 105, 7, WHITE, GREEN_DIM, 0.3)
         
-        # Recipe image from URL
         img_url = recipe.get('image', '')
         img_loaded = False
         if img_url and img_url.startswith('http'):
             img_path = load_image_from_url(img_url, (60, 60))
             if img_path and os.path.exists(img_path):
                 c.saveState()
-                # Clip to circle
                 clip_path = c.beginPath()
                 clip_path.circle(rx + rw/2, ryy-40, 24)
                 c.clipPath(clip_path, stroke=0, fill=0)
@@ -593,7 +604,6 @@ def p5_recipes(c, data):
             circle(c, rx + rw/2, ryy-40, 18, GREEN)
             tc(c, '🍽', rx + rw/2, ryy-44, 'P-Reg', 14, WHITE)
         else:
-            # Draw border circle over image
             c.setStrokeColor(GREEN)
             c.setLineWidth(2)
             c.circle(rx + rw/2, ryy-40, 24, fill=0, stroke=1)
