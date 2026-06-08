@@ -13,132 +13,141 @@ from bidi.algorithm import get_display
 
 W, H = A4
 
+# ═══════════════════════════════════════════════
+# COLORS
+# ═══════════════════════════════════════════════
+BG_DARK     = HexColor('#0A1A0A')
+BG_WHITE    = HexColor('#FFFFFF')
+BG_CREAM    = HexColor('#F8FAF8')
+GREEN       = HexColor('#2E7D32')
+GREEN_MID   = HexColor('#4CAF50')
+GREEN_LIGHT = HexColor('#81C784')
+GREEN_DIM   = HexColor('#C8E6C9')
+GOLD        = HexColor('#C8963E')
+GOLD2       = HexColor('#D4AF37')
+GRAY_DARK   = HexColor('#333333')
+GRAY        = HexColor('#666666')
+GRAY_LIGHT  = HexColor('#999999')
+WHITE       = HexColor('#FFFFFF')
+BLACK       = HexColor('#111111')
+
 # ═══════════════════════════════════════
-# FONT SETUP - Safe with guaranteed fallback
+# FONT SETUP
 # ═══════════════════════════════════════
 
-FONT_PATHS = [
-    (
-        'C:/Windows/Fonts/arial.ttf',
-        'C:/Windows/Fonts/arialbd.ttf'
-    ),
-    (
-        '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-        '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
-    ),
-    (
-        '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-        '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'
-    ),
-    (
-        '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
-        '/usr/share/fonts/truetype/freefont/FreeSansBold.ttf'
-    ),
+ARABIC_FONT_PATHS = [
+    # Local (في فولدر fonts/ جنب الكود)
+    ('fonts/Amiri-Regular.ttf',  'fonts/Amiri-Bold.ttf'),
+    ('fonts/Cairo-Regular.ttf',  'fonts/Cairo-Bold.ttf'),
+    # Linux system fonts
+    ('/usr/share/fonts/truetype/amiri/amiri.ttf',       '/usr/share/fonts/truetype/amiri/amiri-bold.ttf'),
+    ('/usr/share/fonts/truetype/cairo/Cairo-Regular.ttf', '/usr/share/fonts/truetype/cairo/Cairo-Bold.ttf'),
 ]
 
-def _register_builtin_fallbacks():
-    """
-    ReportLab's built-in fonts are ALWAYS available — no file needed.
-    Map our custom names to Helvetica (clean sans-serif, similar to Arial).
-    """
-    from reportlab.lib.fonts import addMapping
-    pdfmetrics.registerFont(pdfmetrics.getFont('Helvetica'))
-    
-    # Create aliases so 'P-Reg', 'P-Bold', etc. always resolve
-    for alias, builtin in [
-        ('P-Reg',   'Helvetica'),
-        ('P-Bold',  'Helvetica-Bold'),
-        ('P-Light', 'Helvetica'),
-        ('P-Med',   'Helvetica'),
-    ]:
-        # Only register if not already registered
-        try:
-            pdfmetrics.getFont(alias)
-        except KeyError:
-            # Register the built-in under our alias name
-            pdfmetrics.registerFontFamily(
-                alias,
-                normal=builtin,
-                bold=builtin,
-            )
-            # Simpler: just re-register the built-in TTF wrapper
-            # Actually for built-ins we need this approach:
-            pass
+LATIN_FONT_PATHS = [
+    ('C:/Windows/Fonts/arial.ttf',                                    'C:/Windows/Fonts/arialbd.ttf'),
+    ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',               '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'),
+    ('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf'),
+]
 
-def setup_fonts():
-    """
-    Try to load a real TTF font.
-    If everything fails, fall back to Helvetica (always works).
-    """
-    # Step 1: Try each font path
-    for reg_path, bold_path in FONT_PATHS:
-        if not os.path.exists(reg_path):
-            continue
-        try:
-            pdfmetrics.registerFont(TTFont('P-Reg', reg_path))
-            pdfmetrics.registerFont(TTFont('P-Light', reg_path))
-            pdfmetrics.registerFont(TTFont('P-Med', reg_path))
-            
-            if os.path.exists(bold_path):
-                pdfmetrics.registerFont(TTFont('P-Bold', bold_path))
-            else:
-                # Bold file missing — use regular as bold (not ideal, but won't crash)
-                pdfmetrics.registerFont(TTFont('P-Bold', reg_path))
-            
-            print(f"[Fonts] Loaded: {reg_path}")
-            return  # ✅ Success — stop here
-        except Exception as e:
-            print(f"[Fonts] Failed to load {reg_path}: {e}")
-            continue
-    
-    # Step 2: All paths failed — use ReportLab built-ins (Helvetica)
-    print("[Fonts] WARNING: No TTF found — using built-in Helvetica fallback")
-    _use_helvetica_fallback()
-
-def _use_helvetica_fallback():
-    """Map P-* names to ReportLab's built-in Helvetica fonts."""
-    # Built-ins don't need TTFont — they're already in ReportLab
-    # We register dummy TTFont wrappers pointing to the built-in names
-    # Instead, we override the draw functions or use a different approach.
-    #
-    # SIMPLEST approach: patch the font name constants globally
-    import sys, types
-    
-    # We can't "alias" built-ins easily, so we write a tiny shim:
-    # Replace calls to 'P-Bold' etc. with 'Helvetica-Bold' etc.
-    global FONT_MAP
-    FONT_MAP = {
-        'P-Reg':   'Helvetica',
-        'P-Bold':  'Helvetica-Bold',
-        'P-Light': 'Helvetica',
-        'P-Med':   'Helvetica',
-    }
-
-# Global font map — identity by default (TTF loaded fine)
 FONT_MAP = {
-    'P-Reg':   'P-Reg',
-    'P-Bold':  'P-Bold',
-    'P-Light': 'P-Light',
-    'P-Med':   'P-Med',
+    'P-Reg':   'Helvetica',
+    'P-Bold':  'Helvetica-Bold',
+    'P-Light': 'Helvetica',
+    'P-Med':   'Helvetica',
+    'AR-Reg':  'Helvetica',
+    'AR-Bold': 'Helvetica-Bold',
 }
 
-# Run on import
+def _try_register(alias, path, fallback):
+    if os.path.exists(path):
+        try:
+            pdfmetrics.registerFont(TTFont(alias, path))
+            FONT_MAP[alias] = alias
+            print(f"[Fonts] ✅ {alias} → {path}")
+            return True
+        except Exception as e:
+            print(f"[Fonts] ❌ {alias} failed: {e}")
+    FONT_MAP[alias] = fallback
+    return False
+
+def setup_fonts():
+    # Latin fonts
+    for reg_path, bold_path in LATIN_FONT_PATHS:
+        if os.path.exists(reg_path):
+            try:
+                pdfmetrics.registerFont(TTFont('P-Reg',   reg_path))
+                pdfmetrics.registerFont(TTFont('P-Light', reg_path))
+                pdfmetrics.registerFont(TTFont('P-Med',   reg_path))
+                FONT_MAP['P-Reg'] = FONT_MAP['P-Light'] = FONT_MAP['P-Med'] = 'P-Reg'
+                if os.path.exists(bold_path):
+                    pdfmetrics.registerFont(TTFont('P-Bold', bold_path))
+                    FONT_MAP['P-Bold'] = 'P-Bold'
+                else:
+                    pdfmetrics.registerFont(TTFont('P-Bold', reg_path))
+                    FONT_MAP['P-Bold'] = 'P-Bold'
+                print(f"[Fonts] ✅ Latin → {reg_path}")
+                break
+            except Exception as e:
+                print(f"[Fonts] ❌ Latin failed: {e}")
+
+    # Arabic fonts
+    arabic_loaded = False
+    for reg_path, bold_path in ARABIC_FONT_PATHS:
+        reg_ok  = _try_register('AR-Reg',  reg_path,  'Helvetica')
+        bold_ok = _try_register('AR-Bold', bold_path, 'Helvetica-Bold')
+        if reg_ok:
+            arabic_loaded = True
+            break
+
+    if not arabic_loaded:
+        print("[Fonts] ⚠️ No Arabic font found — Arabic text will NOT render correctly!")
+        print("[Fonts]    → Add fonts/Amiri-Regular.ttf or fonts/Cairo-Regular.ttf")
+
 setup_fonts()
 
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════
 # ARABIC HELPER
-# ═══════════════════════════════════════════════
+# ═══════════════════════════════════════
+
 def ar(text):
+    """Reshape + bidi Arabic text so it renders correctly in PDF."""
     try:
         s = str(text)
-        if any('\u0600' <= c <= '\u06ff' for c in s):
+        if any('\u0600' <= ch <= '\u06ff' for ch in s):
             reshaped = arabic_reshaper.reshape(s)
-            bidi = get_display(reshaped)
-            return bidi
+            return get_display(reshaped)
         return s
     except:
         return str(text)
 
+def is_arabic(text):
+    return any('\u0600' <= ch <= '\u06ff' for ch in str(text))
+
+# ═══════════════════════════════════════
+# DRAW HELPERS  
+# ═══════════════════════════════════════
+
+def tl(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
+    if is_arabic(str(s)):
+        f = 'AR-Bold' if 'Bold' in f else 'AR-Reg'
+    c.setFillColor(col)
+    c.setFont(FONT_MAP.get(f, f), sz)
+    c.drawString(x, y, ar(s))
+
+def tc(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
+    if is_arabic(str(s)):
+        f = 'AR-Bold' if 'Bold' in f else 'AR-Reg'
+    c.setFillColor(col)
+    c.setFont(FONT_MAP.get(f, f), sz)
+    c.drawCentredString(x, y, ar(s))
+
+def tr(c, s, x, y, f='P-Reg', sz=10, col=BLACK):
+    if is_arabic(str(s)):
+        f = 'AR-Bold' if 'Bold' in f else 'AR-Reg'
+    c.setFillColor(col)
+    c.setFont(FONT_MAP.get(f, f), sz)
+    c.drawRightString(x, y, ar(s))
 # ═══════════════════════════════════════════════
 # IMAGE LOADER
 # ═══════════════════════════════════════════════
@@ -171,23 +180,6 @@ def cleanup_temp_images():
         except:
             pass
 
-# ═══════════════════════════════════════════════
-# COLORS
-# ═══════════════════════════════════════════════
-BG_DARK     = HexColor('#0A1A0A')
-BG_WHITE    = HexColor('#FFFFFF')
-BG_CREAM    = HexColor('#F8FAF8')
-GREEN       = HexColor('#2E7D32')
-GREEN_MID   = HexColor('#4CAF50')
-GREEN_LIGHT = HexColor('#81C784')
-GREEN_DIM   = HexColor('#C8E6C9')
-GOLD        = HexColor('#C8963E')
-GOLD2       = HexColor('#D4AF37')
-GRAY_DARK   = HexColor('#333333')
-GRAY        = HexColor('#666666')
-GRAY_LIGHT  = HexColor('#999999')
-WHITE       = HexColor('#FFFFFF')
-BLACK       = HexColor('#111111')
 
 # ═══════════════════════════════════════════════
 # LAYOUT
@@ -252,18 +244,20 @@ def content_area():
 
 def wrap(c, text, x, y, maxw, f, sz, col, lh=None):
     lh = lh or sz * 1.55
-    c.setFillColor(col); c.setFont(f, sz)
+    if is_arabic(str(text)):
+        f = 'AR-Bold' if 'Bold' in f else 'AR-Reg'
+    mapped_f = FONT_MAP.get(f, f)
+    c.setFillColor(col); c.setFont(mapped_f, sz)
     words = ar(text).split()
     line = []
     for word in words:
-        if c.stringWidth(' '.join(line + [word]), f, sz) <= maxw:
+        if c.stringWidth(' '.join(line + [word]), mapped_f, sz) <= maxw:
             line.append(word)
         else:
             if line: c.drawString(x, y, ' '.join(line)); y -= lh
             line = [word]
     if line: c.drawString(x, y, ' '.join(line)); y -= lh
     return y
-
 # ═══════════════════════════════════════════════
 # CHROME
 # ═══════════════════════════════════════════════
