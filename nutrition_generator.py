@@ -288,20 +288,10 @@ def chrome(c, section, pgnum, data):
     tc(c, section, W/2, H-HDR_H+17, 'P-Reg', 9, GRAY)
     fill_rect(c, 0, 0, W, FTR_H, BG_CREAM)
     hline(c, 0, FTR_H, W, GREEN, 0.6)
-    
-    # Instagram as clickable link
-    ig_text = data.get('instagram', '@coach.teka1')
-    ig_link = data.get('instagram_link', 'https://instagram.com/coach.teka1')
-    tl(c, ig_text, STRIPE_W+12, FTR_H/2-4, 'P-Reg', 8, GREEN)
-    ig_w = c.stringWidth(ig_text, 'P-Reg', 8)
-    c.setStrokeColor(GREEN)
-    c.setLineWidth(0.3)
-    c.line(STRIPE_W+12, FTR_H/2-6, STRIPE_W+12+ig_w, FTR_H/2-6)
-    c.linkURL(ig_link, (STRIPE_W+12, FTR_H/2-9, STRIPE_W+12+ig_w+2, FTR_H/2+3))
-    
+    tl(c, '@coach.teka1', STRIPE_W+12, FTR_H/2-4, 'P-Reg', 8, GREEN)
     tc(c, '01033047057', W/2, FTR_H/2-4, 'P-Reg', 8, GRAY)
     tr(c, f'{pgnum} / {TOTAL_PAGES}', W-12, FTR_H/2-4, 'P-Bold', 9, GREEN)
-    
+
 # ═══════════════════════════════════════════════
 # PAGE 1 - COVER
 # ═══════════════════════════════════════════════
