@@ -288,7 +288,11 @@ def chrome(c, section, pgnum, data):
     tc(c, section, W/2, H-HDR_H+17, 'P-Reg', 9, GRAY)
     fill_rect(c, 0, 0, W, FTR_H, BG_CREAM)
     hline(c, 0, FTR_H, W, GREEN, 0.6)
-    tl(c, '@coach.teka1', STRIPE_W+12, FTR_H/2-4, 'P-Reg', 8, GREEN)
+    ig_text = data.get('instagram', '@coach.teka1')
+    ig_link = data.get('instagram_link', 'https://instagram.com/coach.teka1')
+    tl(c, ig_text, STRIPE_W+12, FTR_H/2-4, 'P-Reg', 8, GREEN)
+    ig_w = c.stringWidth(ig_text, 'P-Reg', 8)
+    c.linkURL(ig_link, (STRIPE_W+12, FTR_H/2-7, STRIPE_W+12+ig_w, FTR_H/2+3))
     tc(c, '01033047057', W/2, FTR_H/2-4, 'P-Reg', 8, GRAY)
     tr(c, f'{pgnum} / {TOTAL_PAGES}', W-12, FTR_H/2-4, 'P-Bold', 9, GREEN)
 
